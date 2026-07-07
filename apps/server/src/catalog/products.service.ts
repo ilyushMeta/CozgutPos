@@ -1,9 +1,10 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { moneyStr, qtyStr, type ProductInput } from '@cozgut/shared';
+import { moneyStr, qtyStr, sumQty, type ProductInput } from '@cozgut/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CodesService } from '../codes/codes.service.js';
 import { PluService } from '../plu/plu.service.js';
+import { CashService } from '../cash/cash.service.js';
 
 @Injectable()
 export class ProductsService {
@@ -11,6 +12,7 @@ export class ProductsService {
     private readonly prisma: PrismaService,
     private readonly codes: CodesService,
     private readonly plu: PluService,
+    private readonly cash: CashService,
   ) {}
 
   findAll(search?: string) {
@@ -30,6 +32,27 @@ export class ProductsService {
     });
     if (!product) throw new NotFoundException('product not found');
     return product;
+  }
+
+  /** HarytMaglumat (price-check) popup data — SPEC §5.2. */
+  async priceCheck(id: number) {
+    const product = await this.findOne(id);
+    const remaining = sumQty(product.batches.map((b) => b.qtyRemaining));
+    // FIFO-next-to-sell batch — the price a sale would actually charge right now.
+    const nextBatch = product.batches.find((b) => Number(b.qtyRemaining) > 0) ?? null;
+
+    return {
+      product: {
+        id: product.id,
+        name: product.name,
+        code: product.code,
+        category: product.category,
+      },
+      remaining: remaining.toFixed(3),
+      currentSellPrice: nextBatch ? nextBatch.sellPrice.toFixed(2) : null,
+      currentBuyPrice: nextBatch ? nextBatch.buyPrice.toFixed(2) : null,
+      cashBalance: (await this.cash.getCurrentBalance()).toFixed(2),
+    };
   }
 
   async generateCode(): Promise<{ code: string }> {

@@ -9,9 +9,10 @@ import { StockBatchesService } from './stock-batches.service.js';
 import { StockBatchesController } from './stock-batches.controller.js';
 import { CodesModule } from '../codes/codes.module.js';
 import { PluModule } from '../plu/plu.module.js';
+import { CashModule } from '../cash/cash.module.js';
 
 @Module({
-  imports: [CodesModule, PluModule],
+  imports: [CodesModule, PluModule, CashModule],
   controllers: [
     CategoriesController,
     ProductsController,

@@ -44,6 +44,11 @@ export class ProductsController {
     return this.products.findOne(id);
   }
 
+  @Get(':id/price-check')
+  priceCheck(@Param('id', ParseIntPipe) id: number) {
+    return this.products.priceCheck(id);
+  }
+
   @Roles(Role.ADMIN)
   @Post()
   create(@Body(new ZodValidationPipe(productSchema)) body: ProductInput) {
