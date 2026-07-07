@@ -136,7 +136,16 @@
     "emptyCart": "Sebet boş",
     "selectPayment": "Töleg görnüş saýla",
     "shortage": "{{count}} sany ýetmeýär",
-    "rolledBack": "hasaplamalar yzyna gaýtaryldy"
+    "rolledBack": "hasaplamalar yzyna gaýtaryldy",
+    "scanPlaceholder": "Barkod skanirle ýa-da ady/kod ýaz",
+    "lineNo": "№",
+    "printFaktur": "Faktur çap",
+    "printed": "Çek çapa iberildi",
+    "printFailed": "Çek çap edilmedi",
+    "belowCostError": "{{name}}: baha ({{price}}) özüne düşýän bahadan ({{cost}}) pes",
+    "lastReceipt": "Soňky çek",
+    "addToCart": "Sebede goş",
+    "remove": "Aýyr"
   },
   "cash": {
     "title": "Kassa",

@@ -136,7 +136,16 @@
     "emptyCart": "Корзина пуста",
     "selectPayment": "Выберите способ оплаты",
     "shortage": "Не хватает {{count}} шт",
-    "rolledBack": "расчёты отменены"
+    "rolledBack": "расчёты отменены",
+    "scanPlaceholder": "Сканируйте штрихкод или введите название/код",
+    "lineNo": "№",
+    "printFaktur": "Печать накладной",
+    "printed": "Чек отправлен на печать",
+    "printFailed": "Не удалось напечатать чек",
+    "belowCostError": "{{name}}: цена ({{price}}) ниже себестоимости ({{cost}})",
+    "lastReceipt": "Последний чек",
+    "addToCart": "В корзину",
+    "remove": "Удалить"
   },
   "cash": {
     "title": "Касса",

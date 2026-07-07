@@ -7,6 +7,7 @@ import type {
   UnitPackInput,
   ReceivingInput,
   StockBatchUpdateInput,
+  CreateSaleInput,
 } from '@cozgut/shared';
 import { useAuthStore } from './store/auth';
 
@@ -90,7 +91,13 @@ export async function listProducts(search?: string) {
     discountPercent: string;
     secondPrice: string | null;
     category: { id: number; name: string } | null;
-    unitPacks: Array<{ id: number; name: string }>;
+    unitPacks: Array<{
+      id: number;
+      name: string;
+      qtyInside: string;
+      buyPrice: string;
+      sellPrice: string;
+    }>;
   }>;
 }
 
@@ -212,4 +219,24 @@ export async function downloadCsv(
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+}
+
+// ── Sales / POS (SPEC §5.2/§6.3/§6.4) ────────────────────────────────────────
+
+export async function createSale(input: CreateSaleInput) {
+  const { data } = await api.post('/sales', input);
+  return data;
+}
+
+export async function priceCheck(productId: number) {
+  const { data } = await api.get(`/products/${productId}/price-check`);
+  return data;
+}
+
+/** Opens the A4 faktur PDF in a new tab (same auth-blob pattern as openLabelPdf). */
+export async function openFakturPdf(saleId: number): Promise<void> {
+  const { data } = await api.get(`/sales/${saleId}/faktur`, { responseType: 'blob' });
+  const url = URL.createObjectURL(data as Blob);
+  window.open(url, '_blank');
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }

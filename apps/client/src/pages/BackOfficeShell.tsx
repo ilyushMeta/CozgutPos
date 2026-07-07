@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/auth';
 import { LanguageSwitch } from '../components/LanguageSwitch';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { ComingSoon } from './ComingSoon';
+import { SalePage } from './SalePage';
 import { CategoriesPage } from './CategoriesPage';
 import { ProductsPage } from './ProductsPage';
 import { ProductFormPage } from './ProductFormPage';
@@ -81,6 +82,7 @@ export function BackOfficeShell() {
         </header>
         <main className="flex-1 p-6 overflow-y-auto">
           <Routes>
+            <Route path="/sale" element={<SalePage />} />
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/products/new" element={<ProductFormPage />} />
             <Route path="/products/:id" element={<ProductFormPage />} />
@@ -93,6 +95,7 @@ export function BackOfficeShell() {
             {NAV_ITEMS.filter(
               (i) =>
                 ![
+                  '/sale',
                   '/products',
                   '/receiving',
                   '/categories',

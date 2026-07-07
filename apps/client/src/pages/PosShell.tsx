@@ -2,8 +2,9 @@ import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/auth';
 import { LanguageSwitch } from '../components/LanguageSwitch';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { SalePage } from './SalePage';
 
-/** Cashier POS shell (SPEC §5.2). Full cart/payment built in Phase 3. */
+/** Cashier POS shell (SPEC §5.2) — full-screen Söwda for the CASHIER role. */
 export function PosShell() {
   const { t } = useTranslation();
   const { user, logout } = useAuthStore();
@@ -29,9 +30,7 @@ export function PosShell() {
         </div>
       </header>
       <main className="flex-1 p-6">
-        <p className="text-gray-500 dark:text-gray-400">
-          {t('sale.title')} ({t('app.loading')})
-        </p>
+        <SalePage />
       </main>
     </div>
   );
