@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 import type { AuthResult, AuthUser } from '@cozgut/shared';
 import { UsersService } from '../users/users.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { PluService } from '../plu/plu.service.js';
 import type { JwtPayload } from './jwt.strategy.js';
 
 @Injectable()
@@ -14,6 +15,7 @@ export class AuthService {
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
     private readonly prisma: PrismaService,
+    private readonly plu: PluService,
   ) {}
 
   /** Validate credentials, write LoginAudit, and issue tokens. SPEC §5.1. */
@@ -25,6 +27,7 @@ export class AuthService {
     if (!ok) throw new UnauthorizedException('invalidCredentials');
 
     await this.prisma.loginAudit.create({ data: { userId: user.id } });
+    void this.plu.exportSafely(); // fire-and-forget (SPEC §5.1/§7.3), never blocks login
 
     const authUser: AuthUser = { id: user.id, username: user.username, role: user.role };
     return this.issueTokens(authUser);
