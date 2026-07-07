@@ -3,14 +3,14 @@
 Rules: one phase per session/branch. Start each phase in plan mode. A phase is DONE only when its acceptance boxes are ticked, tests pass, and the owner approved the summary. Details for every item: see the matching section in docs/SPEC.md.
 
 ## Phase 1 — Foundation
-- [ ] pnpm monorepo scaffold (apps/server, apps/client, packages/shared, packages/printer, tools/migrate-legacy) + ESLint/Prettier + docker-compose MySQL 8
-- [ ] Prisma schema implementing ALL models from SPEC §4.1 + initial migration
-- [ ] Seed script: admin user, demo categories/products/batches, PaymentDiscounts, ExchangeRate, Settings defaults
-- [ ] Auth: bcrypt, JWT + refresh, roles ADMIN/CASHIER, route guards (API + client), LoginAudit
-- [ ] i18n skeleton: i18next, `tm.json` seeded with SPEC §9 vocabulary, `ru.json` stubs, zero hardcoded strings check (lint rule or grep script)
-- [ ] Login screen (TM), license module skeleton (License singleton, remaining-days display, expiry block message)
-- [ ] Settings module (key/value table + UI shell) and first-run wizard: Server vs Client(server IP)
-- [ ] Acceptance: `pnpm dev` runs server+client; login works for both roles; schema migrated clean; all UI text from tm.json
+- [x] pnpm monorepo scaffold (apps/server, apps/client, packages/shared, packages/printer, tools/migrate-legacy) + ESLint/Prettier + docker-compose MySQL 8
+- [x] Prisma schema implementing ALL models from SPEC §4.1 + initial migration
+- [x] Seed script: admin user, demo categories/products/batches, PaymentDiscounts, ExchangeRate, Settings defaults
+- [x] Auth: bcrypt, JWT + refresh, roles ADMIN/CASHIER, route guards (API + client), LoginAudit
+- [x] i18n skeleton: i18next, `tm.json` seeded with SPEC §9 vocabulary, `ru.json` stubs, zero hardcoded strings check (lint rule or grep script)
+- [x] Login screen (TM), license module skeleton (License singleton, remaining-days display, expiry block message)
+- [x] Settings module (key/value table + UI shell) and first-run wizard: Server vs Client(server IP)
+- [x] Acceptance: `pnpm dev` runs server+client; login works for both roles; schema migrated clean; all UI text from tm.json
 
 ## Phase 2 — Inventory & Purchasing
 - [ ] Categories CRUD; Products CRUD (code unique, scale-item flag, low-stock threshold, expiry, discount %, second price)
