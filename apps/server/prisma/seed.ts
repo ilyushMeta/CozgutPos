@@ -124,7 +124,7 @@ async function main() {
   });
 
   // ── Code sequences (SPEC §6.9) ──────────────────────────────────────────────
-  for (const pool of ['product', 'composite', 'debtor', 'supplier']) {
+  for (const pool of ['product', 'composite', 'debtor', 'supplier', 'invoice']) {
     await prisma.codeSequence.upsert({
       where: { pool },
       update: {},

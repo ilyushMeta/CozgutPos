@@ -11,6 +11,14 @@ import { RealtimeModule } from './realtime/realtime.module.js';
 import { JwtAuthGuard } from './auth/jwt-auth.guard.js';
 import { RolesGuard } from './auth/roles.guard.js';
 import { HealthController } from './health.controller.js';
+import { CodesModule } from './codes/codes.module.js';
+import { CashModule } from './cash/cash.module.js';
+import { CatalogModule } from './catalog/catalog.module.js';
+import { ReceivingModule } from './receiving/receiving.module.js';
+import { StockViewsModule } from './stock-views/stock-views.module.js';
+import { LabelsModule } from './labels/labels.module.js';
+import { PluModule } from './plu/plu.module.js';
+import { SuppliersModule } from './suppliers/suppliers.module.js';
 
 @Module({
   imports: [
@@ -22,6 +30,14 @@ import { HealthController } from './health.controller.js';
     LicenseModule,
     SettingsModule,
     RealtimeModule,
+    CodesModule,
+    CashModule,
+    CatalogModule,
+    ReceivingModule,
+    StockViewsModule,
+    LabelsModule,
+    PluModule,
+    SuppliersModule,
   ],
   controllers: [HealthController],
   providers: [
