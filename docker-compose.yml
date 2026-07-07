@@ -1,0 +1,25 @@
+# Local dev MySQL 8. Production uses the shop PC's MySQL/XAMPP.
+# Start with:  docker compose up -d db
+services:
+  db:
+    image: mysql:8
+    container_name: cozgut-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: devroot
+      MYSQL_DATABASE: cozgut
+      MYSQL_USER: cozgut_app
+      MYSQL_PASSWORD: devpass
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    ports:
+      - '3306:3306'
+    volumes:
+      - cozgut_db_data:/var/lib/mysql
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-pdevroot']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  cozgut_db_data:

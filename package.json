@@ -1,0 +1,28 @@
+{
+  "name": "cozgut-pos",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Çözgüt POS — modern LAN-first retail POS rewrite",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm -F @cozgut/shared build && concurrently -n shared,server,client -c gray,blue,green \"pnpm -F @cozgut/shared dev\" \"pnpm -F @cozgut/server dev\" \"pnpm -F @cozgut/client dev\"",
+    "build": "pnpm -F @cozgut/shared build && pnpm -F @cozgut/printer build && pnpm -F @cozgut/server build && pnpm -F @cozgut/client build",
+    "test": "pnpm -r test",
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write .",
+    "check:strings": "node tools/check-hardcoded-strings.mjs",
+    "migrate:legacy": "pnpm -F @cozgut/migrate-legacy start"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.20.0",
+    "@typescript-eslint/parser": "^8.20.0",
+    "concurrently": "^9.1.2",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  }
+}

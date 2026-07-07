@@ -1,0 +1,13 @@
+node_modules
+dist
+build
+pnpm-lock.yaml
+legacy/dump.sql
+
+# Owner-authored source docs — do not reformat.
+CLAUDE.md
+README.md
+docs/SPEC.md
+docs/PHASES.md
+
+**/prisma/migrations/**
