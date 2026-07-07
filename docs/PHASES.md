@@ -23,14 +23,14 @@ Rules: one phase per session/branch. Start each phase in plan mode. A phase is D
 - [x] Acceptance: receive goods on supplier credit → supplier balance up + CashMove absent; receive with cashbox pay → CashMove expense written; CSV exports open in Excel
 
 ## Phase 3 — POS Core
-- [ ] FIFO engine in server (SPEC §6.2) as a pure, unit-tested service; LIFO honored via Settings flag; batchBreakdown stored per line
-- [ ] Concurrency: transaction + locking; test proving two parallel sales cannot oversell one batch (SPEC §11)
-- [ ] Söwda screen: scanner-first search with suggestions, cart with inline qty/unit-price/line-total edit, `a/b` fraction input, unit-pack selector, composite expansion (engine hookup in Phase 5)
-- [ ] Payments: cash+card+debt split, live change, negative change = discount w/ % (SPEC §6.10), per-method PaymentDiscount
-- [ ] Sale transaction (SPEC §6.3–6.4): validations w/ admin bypass checkboxes, atomic save, CashMove for cash part
-- [ ] Receipt printing ESC/POS with SPEC §7.1 field set; copies counter; A4 faktur PDF; price-check popup (HarytMaglumat)
-- [ ] Unit tests: money rounding, change/discount, FIFO consumption, pack qty math
-- [ ] Acceptance checklist items 1 (partial: cash/card), 3, 5 from SPEC §13 pass
+- [x] FIFO engine in server (SPEC §6.2) as a pure, unit-tested service; LIFO honored via Settings flag; batchBreakdown stored per line
+- [x] Concurrency: transaction + locking; test proving two parallel sales cannot oversell one batch (SPEC §11)
+- [x] Söwda screen: scanner-first search with suggestions, cart with inline qty/unit-price/line-total edit, `a/b` fraction input, unit-pack selector, composite expansion (engine hookup in Phase 5)
+- [x] Payments: cash+card split (debt deferred to Phase 4 — see summary), live change, negative change = discount w/ % (SPEC §6.10), per-method PaymentDiscount
+- [x] Sale transaction (SPEC §6.3–6.4): validations w/ admin bypass checkboxes, atomic save, CashMove for cash part
+- [x] Receipt printing ESC/POS with SPEC §7.1 field set; copies counter; A4 faktur PDF; price-check popup (HarytMaglumat)
+- [x] Unit tests: money rounding, change/discount, FIFO consumption, pack qty math
+- [x] Acceptance checklist items 1 (partial: cash/card), 3, 5 from SPEC §13 pass
 
 ## Phase 4 — Debts
 - [ ] Debtors CRUD (auto code, +993 phone, TMT/USD account) with overdue color rules; Suppliers CRUD
