@@ -38,6 +38,8 @@
   },
   "nav": {
     "sale": "Продажа",
+    "products": "Товары",
+    "categories": "Категории",
     "goodsReceive": "Приём товара",
     "warehouse": "Склад",
     "cashRegister": "Касса",
@@ -72,7 +74,45 @@
     "secondPrice": "Вторая цена продажи",
     "discount": "Скидка",
     "scaleItem": "Весовой товар",
-    "unitPack": "Упаковка"
+    "unitPack": "Упаковка",
+    "unitPacks": "Упаковки",
+    "addUnitPack": "Добавить упаковку",
+    "qtyInside": "Внутри",
+    "lowStockThreshold": "Порог остатка",
+    "addNew": "Новый товар",
+    "editTitle": "Изменить товар",
+    "generateCode": "Создать код",
+    "deleteBlocked": "Товар используется на складе или в продажах, удалить нельзя",
+    "deleteCategoryBlocked": "В категории есть товары, удалить нельзя",
+    "printLabel": "Печать этикетки",
+    "copies": "Количество копий",
+    "searchPlaceholder": "Поиск по названию или коду",
+    "batches": "Партии",
+    "noBatches": "Нет партий"
+  },
+  "category": {
+    "title": "Категории",
+    "addNew": "Новая категория"
+  },
+  "receiving": {
+    "title": "Приём товара",
+    "paymentSource": "Источник оплаты",
+    "none": "Нет",
+    "cashbox": "Из кассы",
+    "supplierCredit": "В долг поставщику",
+    "selectSupplier": "Выберите поставщика",
+    "addLine": "Добавить строку",
+    "removeLine": "Удалить",
+    "existingProduct": "Существующий товар",
+    "newProduct": "Новый товар",
+    "marginPercent": "Наценка %",
+    "applyMargin": "Рассчитать",
+    "submit": "Сохранить",
+    "success": "Успешно добавлено",
+    "invoiceNo": "Номер накладной"
+  },
+  "stock": {
+    "expiringDays": "В течение дней"
   },
   "sale": {
     "title": "Продажа",
@@ -164,6 +204,9 @@
     "surplus": "Излишек",
     "difference": "Разница",
     "result": "Результат",
-    "all": "Все"
+    "all": "Все",
+    "actions": "Действия",
+    "confirmDelete": "Подтвердить удаление?",
+    "noResults": "Ничего не найдено"
   }
 }

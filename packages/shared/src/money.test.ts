@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { money, qty, moneyStr, sumMoney, parseLegacyNumber, parseQtyInput } from './money.js';
+import {
+  money,
+  qty,
+  moneyStr,
+  sumMoney,
+  parseLegacyNumber,
+  parseQtyInput,
+  applyMargin,
+} from './money.js';
 
 describe('money rounding (SPEC §6.1, round half-up 2dp)', () => {
   it('rounds half up', () => {
@@ -48,5 +56,16 @@ describe('parseQtyInput (fractions, SPEC §5.2)', () => {
     expect(parseQtyInput('')).toBeNull();
     expect(parseQtyInput('1/0')).toBeNull();
     expect(parseQtyInput('x')).toBeNull();
+  });
+});
+
+describe('applyMargin (Haryt goş "B%" helper, SPEC §5.3)', () => {
+  it('applies a percent margin on top of buy price', () => {
+    expect(applyMargin(10, 20).toFixed(2)).toBe('12.00');
+    expect(applyMargin('100', '15').toFixed(2)).toBe('115.00');
+  });
+
+  it('zero margin returns the buy price', () => {
+    expect(applyMargin(50, 0).toFixed(2)).toBe('50.00');
   });
 });

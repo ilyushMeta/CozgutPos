@@ -40,6 +40,16 @@ export const SupplierMoveType = {
 } as const;
 export type SupplierMoveType = (typeof SupplierMoveType)[keyof typeof SupplierMoveType];
 
+/** Funding source for a goods-receiving invoice (SPEC §5.3/§6.8) — see Phase 2 plan
+ * note: legacy ledgers (ammar.karzKot / kassahereket) show no partial-split payment,
+ * so an invoice uses exactly one source. */
+export const PaymentSource = {
+  NONE: 'NONE',
+  CASHBOX: 'CASHBOX',
+  SUPPLIER_CREDIT: 'SUPPLIER_CREDIT',
+} as const;
+export type PaymentSource = (typeof PaymentSource)[keyof typeof PaymentSource];
+
 export const LicensePlan = {
   TRIAL: 'TRIAL',
   STANDARD: 'STANDARD',
@@ -58,6 +68,7 @@ export const SettingKey = {
   SCALE_ENABLED: 'scale.enabled',
   SCALE_PLU_PATH: 'scale.pluPath',
   SCALE_COMMAND: 'scale.command',
+  SCALE_PLU_TEMPLATE: 'scale.pluTemplate', // placeholders: {plu} {name} {price} {code}
   SMS_GATEWAY_IP: 'sms.gatewayIp',
   SMS_TOKEN: 'sms.token',
   LANGUAGE: 'ui.language', // 'tm' | 'ru'

@@ -44,3 +44,20 @@ export const settingSchema = z.object({
   value: z.string(),
 });
 export type SettingInput = z.infer<typeof settingSchema>;
+
+/**
+ * First-run wizard submission (SPEC §3). Public by necessity — nobody has
+ * logged in yet — but the server only accepts it once (see
+ * SettingsService.completeFirstRun): it always re-checks FIRST_RUN_DONE
+ * itself rather than trusting this flag from the request.
+ */
+export const firstRunSchema = z
+  .object({
+    mode: z.enum(['SERVER', 'CLIENT']),
+    serverIp: z.string().min(1).optional(),
+  })
+  .refine((v) => v.mode !== 'CLIENT' || !!v.serverIp, {
+    message: 'serverIp is required for CLIENT mode',
+    path: ['serverIp'],
+  });
+export type FirstRunInput = z.infer<typeof firstRunSchema>;

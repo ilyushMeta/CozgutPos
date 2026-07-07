@@ -91,4 +91,13 @@ export function parseQtyInput(raw: string): Decimal | null {
   }
 }
 
+/**
+ * Apply a percent margin on top of a buy price to suggest a sell price
+ * (Haryt goş "B%" helper, SPEC §5.3). E.g. buyPrice=10, marginPercent=20 → 12.00.
+ */
+export function applyMargin(buyPrice: Numeric, marginPercent: Numeric): Decimal {
+  const factor = dec(1).plus(dec(marginPercent).dividedBy(100));
+  return money(dec(buyPrice).times(factor));
+}
+
 export { Decimal };

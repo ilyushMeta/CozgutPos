@@ -8,7 +8,12 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, extname } from 'node:path';
 
 const ROOT = new URL('../apps/client/src', import.meta.url).pathname;
-const ALLOW = [/^[\s\d.,:;!?%×✓☀️🌙+\-/()]*$/u, /app\.name/, /Çözgüt POS/];
+const ALLOW = [
+  /^[\s\d.,:;!?%×✓☀️🌙+\-/()]*$/u,
+  /app\.name/,
+  /Çözgüt POS/,
+  /^(TMT|USD)$/, // currency codes are not translated in any locale
+];
 
 function walk(dir) {
   const out = [];
@@ -26,7 +31,8 @@ for (const file of walk(ROOT)) {
   const lines = src.split('\n');
   lines.forEach((line, i) => {
     // JSX text between > and < that contains letters, ignoring {expressions}.
-    const m = line.match(/>\s*([A-Za-zÇĞİÖŞÜçğıöşü][^<>{}]*[A-Za-zÇĞİÖŞÜçğıöşü])\s*</);
+    // (?<!=) excludes arrow-function `=>` so `() => foo<Bar>()` isn't misread as JSX text.
+    const m = line.match(/(?<!=)>\s*([A-Za-zÇĞİÖŞÜçğıöşü][^<>{}]*[A-Za-zÇĞİÖŞÜçğıöşü])\s*</);
     if (!m) return;
     const text = m[1].trim();
     if (ALLOW.some((rx) => rx.test(text))) return;

@@ -38,6 +38,8 @@
   },
   "nav": {
     "sale": "Söwda",
+    "products": "Harytlar",
+    "categories": "Kategoriýalar",
     "goodsReceive": "Haryt goş",
     "warehouse": "Ammar",
     "cashRegister": "Kassa",
@@ -72,7 +74,45 @@
     "secondPrice": "Ikinji satlyk baha",
     "discount": "Skidka",
     "scaleItem": "Terezi haryt",
-    "unitPack": "Ölçeg"
+    "unitPack": "Ölçeg",
+    "unitPacks": "Ölçegler",
+    "addUnitPack": "Ölçeg goş",
+    "qtyInside": "Içinde",
+    "lowStockThreshold": "Azalma serhedi",
+    "addNew": "Täze haryt",
+    "editTitle": "Haryty üýtget",
+    "generateCode": "Kod döret",
+    "deleteBlocked": "Bu haryt ammarda ýa-da satuwda ulanylýar, pozup bolmaýar",
+    "deleteCategoryBlocked": "Bu kategoriýada haryt bar, pozup bolmaýar",
+    "printLabel": "Etiketka çap",
+    "copies": "Nusga sany",
+    "searchPlaceholder": "Ady ýa-da kod boýunça gözle",
+    "batches": "Partiýalar",
+    "noBatches": "Partiýa ýok"
+  },
+  "category": {
+    "title": "Kategoriýalar",
+    "addNew": "Täze kategoriýa"
+  },
+  "receiving": {
+    "title": "Haryt goş",
+    "paymentSource": "Töleg çeşmesi",
+    "none": "Ýok",
+    "cashbox": "Kassadan",
+    "supplierCredit": "Dükan-karza",
+    "selectSupplier": "Dükany saýla",
+    "addLine": "Setir goş",
+    "removeLine": "Aýyr",
+    "existingProduct": "Bar haryt",
+    "newProduct": "Täze haryt",
+    "marginPercent": "Margin %",
+    "applyMargin": "Hasapla",
+    "submit": "Ýatda sakla",
+    "success": "Üstünlikli goşuldy",
+    "invoiceNo": "Faktur belgisi"
+  },
+  "stock": {
+    "expiringDays": "Gün içinde"
   },
   "sale": {
     "title": "Söwda",
@@ -164,6 +204,9 @@
     "surplus": "Artyk",
     "difference": "Tapawut",
     "result": "Netije",
-    "all": "Hemmesi"
+    "all": "Hemmesi",
+    "actions": "Hereketler",
+    "confirmDelete": "Pozmagy tassyklaýarsyňmy?",
+    "noResults": "Netije tapylmady"
   }
 }
