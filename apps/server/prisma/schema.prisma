@@ -1,0 +1,549 @@
+// Çözgüt POS — Prisma schema (SPEC §4.1). MySQL 8 (MariaDB acceptable for dev).
+// Money = Decimal(16,2); Qty = Decimal(16,3). Legacy identifiers preserved in
+// `legacy*` columns for the Phase 7 migration. Every legacy table is represented.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+// ── Enums ─────────────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  CASHIER
+}
+
+enum Currency {
+  TMT
+  USD
+}
+
+enum ShopId {
+  MAIN
+  SECOND
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  DEBT
+}
+
+enum CashMoveType {
+  SALE_CASH
+  DEPOSIT
+  WITHDRAWAL
+  PURCHASE_PAYMENT
+  DEBT_PAYMENT_IN
+}
+
+enum SupplierMoveType {
+  PURCHASE
+  PAYMENT
+}
+
+enum LicensePlan {
+  TRIAL
+  STANDARD
+  UNLIMITED
+}
+
+enum StocktakeStatus {
+  OPEN
+  FINISHED
+}
+
+// ── Users & audit ─────────────────────────────────────────────────────────────
+
+model User {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique @db.VarChar(64)
+  passwordHash String   @db.VarChar(255)
+  role         Role     @default(CASHIER)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  loginAudits LoginAudit[]
+  sales       Sale[]
+
+  @@map("users")
+}
+
+// ← legacy hasabat(at, sene, sagat)
+model LoginAudit {
+  id     Int      @id @default(autoincrement())
+  userId Int
+  at     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("login_audits")
+}
+
+// ── Catalog ───────────────────────────────────────────────────────────────────
+
+// ← legacy kategoriya(kategor)
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(191)
+  createdAt DateTime @default(now())
+
+  products       Product[]
+  neededProducts NeededProduct[]
+
+  @@map("categories")
+}
+
+// Product identity is derived from legacy `ammar` rows grouped by `kot`.
+model Product {
+  id                Int       @id @default(autoincrement())
+  name              String    @db.VarChar(191)
+  code              String    @unique @db.VarChar(64)
+  categoryId        Int?
+  isScaleItem       Boolean   @default(false)
+  lowStockThreshold Decimal   @default(0) @db.Decimal(16, 3)
+  expiryDate        DateTime? @db.Date
+  discountPercent   Decimal   @default(0) @db.Decimal(16, 2)
+  secondPrice       Decimal?  @db.Decimal(16, 2) // ikinjiSatlyk
+  isComposite       Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  category           Category?    @relation(fields: [categoryId], references: [id])
+  batches            StockBatch[]
+  unitPacks          UnitPack[]
+  saleLines          SaleLine[]
+  recipe             Recipe?      @relation("compositeProduct")
+  recipeUsages       RecipeItem[] @relation("ingredient")
+  revisionLines      RevisionLine[]
+  stocktakeLines     StocktakeLine[]
+
+  @@index([name])
+  @@index([categoryId])
+  @@map("products")
+}
+
+// ← legacy ammar(...) — every ammar row becomes one StockBatch.
+model StockBatch {
+  id              Int       @id @default(autoincrement())
+  productId       Int
+  qtyInitial      Decimal   @db.Decimal(16, 3)
+  qtyRemaining    Decimal   @db.Decimal(16, 3)
+  buyPrice        Decimal   @db.Decimal(16, 2) // TMT
+  sellPrice       Decimal   @db.Decimal(16, 2) // TMT
+  sellPriceUSD    Decimal?  @db.Decimal(16, 2)
+  currency        Currency  @default(TMT)
+  buyRate         Decimal?  @db.Decimal(16, 2) // kurs at purchase
+  receivedAt      DateTime  @default(now())
+  invoiceNo       Int? // faktur
+  supplierDebtCode String?  @db.VarChar(64) // karzKot
+  legacyAmmarId   String?   @db.VarChar(64)
+
+  product   Product   @relation(fields: [productId], references: [id])
+  returns   Return[]
+
+  @@index([productId, receivedAt]) // FIFO order (SPEC §6.2)
+  @@index([qtyRemaining])
+  @@map("stock_batches")
+}
+
+// ← legacy kopolceg(kot, Olceg, Icinde, AlnanBaha, satlykBaha, sene)
+model UnitPack {
+  id        Int      @id @default(autoincrement())
+  productId Int
+  name      String   @db.VarChar(64) // Olceg e.g. "Gap"
+  qtyInside Decimal  @db.Decimal(16, 3)
+  buyPrice  Decimal  @db.Decimal(16, 2)
+  sellPrice Decimal  @db.Decimal(16, 2)
+  createdAt DateTime @default(now())
+
+  product   Product    @relation(fields: [productId], references: [id])
+  saleLines SaleLine[]
+
+  @@index([productId])
+  @@map("unit_packs")
+}
+
+// ── Recipes / composite products ← legacy f2, umumystirhkot, harytmukdar ────────
+
+model Recipe {
+  id                 Int      @id @default(autoincrement())
+  compositeProductId Int      @unique
+  createdAt          DateTime @default(now())
+
+  compositeProduct Product      @relation("compositeProduct", fields: [compositeProductId], references: [id])
+  items            RecipeItem[]
+
+  @@map("recipes")
+}
+
+model RecipeItem {
+  id                  Int     @id @default(autoincrement())
+  recipeId            Int
+  ingredientProductId Int
+  qty                 Decimal @db.Decimal(16, 3)
+
+  recipe     Recipe  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  ingredient Product @relation("ingredient", fields: [ingredientProductId], references: [id])
+
+  @@index([recipeId])
+  @@map("recipe_items")
+}
+
+// ── Sales ← legacy fakturtoleg + satylanharytlar ────────────────────────────────
+
+model Sale {
+  id           Int           @id @default(autoincrement()) // sowdaId
+  receiptNo    Int // sowdaNomer (global counter)
+  datetime     DateTime      @default(now())
+  cashierId    Int
+  total        Decimal       @db.Decimal(16, 2)
+  paidCash     Decimal       @default(0) @db.Decimal(16, 2)
+  paidCard     Decimal       @default(0) @db.Decimal(16, 2)
+  paidDebt     Decimal       @default(0) @db.Decimal(16, 2)
+  changeGiven  Decimal       @default(0) @db.Decimal(16, 2)
+  discount     Decimal       @default(0) @db.Decimal(16, 2)
+  debtorId     Int?
+  exchangeRate Decimal       @default(0) @db.Decimal(16, 2)
+  cogsTotal    Decimal       @default(0) @db.Decimal(16, 2)
+  shopId       ShopId        @default(MAIN)
+  legacySowdaId String?      @db.VarChar(64)
+
+  cashier  User       @relation(fields: [cashierId], references: [id])
+  debtor   Customer?  @relation(fields: [debtorId], references: [id])
+  lines    SaleLine[]
+  debtSale DebtSale?
+
+  @@index([receiptNo])
+  @@index([datetime])
+  @@index([debtorId])
+  @@map("sales")
+}
+
+// ← legacy satylanharytlar / satylanharytlarikinjidukan (shopId discriminates)
+model SaleLine {
+  id                   Int      @id @default(autoincrement())
+  saleId               Int
+  productId            Int
+  batchBreakdown       Json // [{batchId, qty, buyPrice}]
+  qty                  Decimal  @db.Decimal(16, 3)
+  unitPackId           Int?
+  unitPrice            Decimal  @db.Decimal(16, 2)
+  lineTotal            Decimal  @db.Decimal(16, 2)
+  cogs                 Decimal  @db.Decimal(16, 2)
+  categoryNameSnapshot String?  @db.VarChar(191)
+  productNameSnapshot  String   @db.VarChar(191)
+
+  sale     Sale      @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product  Product   @relation(fields: [productId], references: [id])
+  unitPack UnitPack? @relation(fields: [unitPackId], references: [id])
+  returns  Return[]
+
+  @@index([saleId])
+  @@index([productId])
+  @@map("sale_lines")
+}
+
+// ← legacy "Yzyna goýmak" flow
+model Return {
+  id               Int      @id @default(autoincrement())
+  saleLineId       Int
+  qty              Decimal  @db.Decimal(16, 3)
+  datetime         DateTime @default(now())
+  restockedBatchId Int
+  moneyAdjustment  Decimal  @db.Decimal(16, 2)
+
+  saleLine       SaleLine   @relation(fields: [saleLineId], references: [id])
+  restockedBatch StockBatch @relation(fields: [restockedBatchId], references: [id])
+
+  @@index([saleLineId])
+  @@map("returns")
+}
+
+// ── Customer debts ← legacy karzcylar, karzkotlar ───────────────────────────────
+
+model Customer {
+  id              Int      @id @default(autoincrement())
+  code            String   @unique @db.VarChar(64) // karzkot
+  name            String   @db.VarChar(191)
+  note            String?  @db.Text
+  phone           String?  @db.VarChar(32)
+  accountCurrency Currency @default(TMT) // shot: 'wlyt' → USD
+  balance         Decimal  @default(0) @db.Decimal(16, 2)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  sales        Sale[]
+  debtSales    DebtSale[]
+  schedules    DebtSchedule[]
+  payments     DebtPayment[]
+
+  @@index([name])
+  @@map("customers")
+}
+
+// ← legacy karzsatylanharytlar
+model DebtSale {
+  id        Int      @id @default(autoincrement())
+  debtorId  Int
+  saleId    Int      @unique
+  invoiceNo Int?
+  saleDate  DateTime
+  dueDate   DateTime?
+  amount    Decimal  @db.Decimal(16, 2)
+  paid      Decimal  @default(0) @db.Decimal(16, 2)
+
+  debtor Customer @relation(fields: [debtorId], references: [id])
+  sale   Sale     @relation(fields: [saleId], references: [id])
+
+  @@index([debtorId])
+  @@map("debt_sales")
+}
+
+// ← legacy karzabarotka (monthly installment rows — SPEC §6.5)
+model DebtSchedule {
+  id             Int       @id @default(autoincrement())
+  debtorId       Int
+  invoiceNo      Int?
+  txDate         DateTime
+  dueDate        DateTime?
+  openingBalance Decimal   @db.Decimal(16, 2)
+  amount         Decimal   @db.Decimal(16, 2)
+  paid           Decimal   @default(0) @db.Decimal(16, 2)
+  closingBalance Decimal   @db.Decimal(16, 2)
+
+  debtor Customer @relation(fields: [debtorId], references: [id])
+
+  @@index([debtorId, dueDate])
+  @@map("debt_schedules")
+}
+
+model DebtPayment {
+  id              Int      @id @default(autoincrement())
+  debtorId        Int
+  amount          Decimal  @db.Decimal(16, 2)
+  currency        Currency @default(TMT)
+  datetime        DateTime @default(now())
+  note            String?  @db.Text
+  receiptPrinted  Boolean  @default(false)
+
+  debtor Customer @relation(fields: [debtorId], references: [id])
+
+  @@index([debtorId])
+  @@map("debt_payments")
+}
+
+// ── Supplier debts ← legacy karzdukana, karzdukankotlar ─────────────────────────
+
+model Supplier {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique @db.VarChar(64)
+  name      String   @db.VarChar(191)
+  note      String?  @db.Text
+  phone     String?  @db.VarChar(32)
+  balance   Decimal  @default(0) @db.Decimal(16, 2)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  moves SupplierDebtMove[]
+
+  @@index([name])
+  @@map("suppliers")
+}
+
+// ← legacy karzdukanabarotka + karzdukanhereketler
+model SupplierDebtMove {
+  id         Int              @id @default(autoincrement())
+  supplierId Int
+  invoiceNo  Int?
+  txDate     DateTime         @default(now())
+  type       SupplierMoveType
+  amount     Decimal          @db.Decimal(16, 2)
+  opening    Decimal          @db.Decimal(16, 2)
+  closing    Decimal          @db.Decimal(16, 2)
+  note       String?          @db.Text
+
+  supplier Supplier @relation(fields: [supplierId], references: [id])
+
+  @@index([supplierId])
+  @@map("supplier_debt_moves")
+}
+
+// ── Cash register ← legacy abarotkakassa, kassahereket ──────────────────────────
+
+model CashRegisterDay {
+  id             Int      @id @default(autoincrement())
+  date           DateTime @unique @db.Date
+  openingBalance Decimal  @default(0) @db.Decimal(16, 2)
+  income         Decimal  @default(0) @db.Decimal(16, 2)
+  expense        Decimal  @default(0) @db.Decimal(16, 2)
+  closingBalance Decimal  @default(0) @db.Decimal(16, 2)
+
+  @@map("cash_register_days")
+}
+
+model CashMove {
+  id            Int          @id @default(autoincrement())
+  datetime      DateTime     @default(now())
+  type          CashMoveType
+  amount        Decimal      @db.Decimal(16, 2)
+  balanceBefore Decimal      @db.Decimal(16, 2)
+  note          String?      @db.VarChar(191) // receiptNo or person
+
+  @@index([datetime])
+  @@map("cash_moves")
+}
+
+// ── Discounts, currency ← legacy tolegskidka ────────────────────────────────────
+
+model PaymentDiscount {
+  id      Int           @id @default(autoincrement())
+  method  PaymentMethod @unique
+  percent Decimal       @default(0) @db.Decimal(16, 2)
+
+  @@map("payment_discounts")
+}
+
+// ← legacy exchange rate stored in tolegskidka('Walyuta'); history going forward
+model ExchangeRate {
+  id            Int      @id @default(autoincrement())
+  rate          Decimal  @db.Decimal(16, 2)
+  effectiveFrom DateTime @default(now())
+
+  @@index([effectiveFrom])
+  @@map("exchange_rates")
+}
+
+// ── Needed products ← legacy gerekharytlar ──────────────────────────────────────
+
+model NeededProduct {
+  id         Int      @id @default(autoincrement())
+  name       String   @db.VarChar(191)
+  code       String?  @db.VarChar(64)
+  qty        Decimal  @default(0) @db.Decimal(16, 3)
+  categoryId Int?
+  createdAt  DateTime @default(now())
+
+  category Category? @relation(fields: [categoryId], references: [id])
+
+  @@map("needed_products")
+}
+
+// ── Revision & stocktake ← legacy rewiz, Tükelleme ──────────────────────────────
+
+model StockRevision {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  note      String?  @db.Text
+
+  lines RevisionLine[]
+
+  @@map("stock_revisions")
+}
+
+model RevisionLine {
+  id           Int      @id @default(autoincrement())
+  revisionId   Int
+  productId    Int
+  systemQty    Decimal  @db.Decimal(16, 3) // ammar
+  countedQty   Decimal  @db.Decimal(16, 3) // dukan
+  diff         Decimal  @db.Decimal(16, 3) // tapawut
+  unitPrice    Decimal  @db.Decimal(16, 2) // baha
+  amount       Decimal  @db.Decimal(16, 2) // jem
+  sellPriceRef Decimal? @db.Decimal(16, 2) // satlyk
+  result       String?  @db.VarChar(64) // netije
+  note         String?  @db.Text // bellik
+
+  revision StockRevision @relation(fields: [revisionId], references: [id], onDelete: Cascade)
+  product  Product       @relation(fields: [productId], references: [id])
+
+  @@index([revisionId])
+  @@map("revision_lines")
+}
+
+model Stocktake {
+  id         Int             @id @default(autoincrement())
+  startedAt  DateTime        @default(now())
+  finishedAt DateTime?
+  status     StocktakeStatus @default(OPEN)
+
+  lines StocktakeLine[]
+
+  @@map("stocktakes")
+}
+
+model StocktakeLine {
+  id          Int     @id @default(autoincrement())
+  stocktakeId Int
+  productId   Int
+  countedQty  Decimal @db.Decimal(16, 3)
+  systemQty   Decimal @db.Decimal(16, 3)
+  diff        Decimal @db.Decimal(16, 3)
+
+  stocktake Stocktake @relation(fields: [stocktakeId], references: [id], onDelete: Cascade)
+  product   Product   @relation(fields: [productId], references: [id])
+
+  @@index([stocktakeId])
+  @@map("stocktake_lines")
+}
+
+// ── Daily rollup ← legacy dailysale ─────────────────────────────────────────────
+
+model DailySummary {
+  id      Int      @id @default(autoincrement())
+  date    DateTime @unique @db.Date
+  cogs    Decimal  @default(0) @db.Decimal(16, 2)
+  revenue Decimal  @default(0) @db.Decimal(16, 2)
+  profit  Decimal  @default(0) @db.Decimal(16, 2)
+
+  @@map("daily_summaries")
+}
+
+// ── Licensing ← legacy rugsat, codes ────────────────────────────────────────────
+
+model License {
+  id           Int         @id @default(1) // singleton
+  remainingDays Int        @default(0)
+  lastSeenDate DateTime    @db.Date
+  hardwareId   String?     @db.VarChar(191)
+  plan         LicensePlan @default(TRIAL)
+  updatedAt    DateTime    @updatedAt
+
+  @@map("license")
+}
+
+model ActivationCode {
+  id     Int       @id @default(autoincrement())
+  code   String    @unique @db.VarChar(64)
+  days   Int       @default(0)
+  usedAt DateTime?
+
+  @@map("activation_codes")
+}
+
+// ── Settings ← replaces legacy C:\xampp\*.txt files ─────────────────────────────
+
+model Setting {
+  key       String   @id @db.VarChar(64)
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
+
+// ── Code registry (SPEC §6.9 funTazeKod) ← legacy codes, karzkotlar, karzdukankotlar ──
+
+model CodeSequence {
+  pool String @id @db.VarChar(32) // 'product' | 'composite' | 'debtor' | 'supplier'
+  next Int    @default(1)
+
+  @@map("code_sequences")
+}
