@@ -19,6 +19,9 @@ import { StockViewsModule } from './stock-views/stock-views.module.js';
 import { LabelsModule } from './labels/labels.module.js';
 import { PluModule } from './plu/plu.module.js';
 import { SuppliersModule } from './suppliers/suppliers.module.js';
+import { FifoModule } from './fifo/fifo.module.js';
+import { SalesModule } from './sales/sales.module.js';
+import { PrintingModule } from './printing/printing.module.js';
 
 @Module({
   imports: [
@@ -38,6 +41,9 @@ import { SuppliersModule } from './suppliers/suppliers.module.js';
     LabelsModule,
     PluModule,
     SuppliersModule,
+    FifoModule,
+    SalesModule,
+    PrintingModule,
   ],
   controllers: [HealthController],
   providers: [
