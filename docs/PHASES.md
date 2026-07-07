@@ -13,14 +13,14 @@ Rules: one phase per session/branch. Start each phase in plan mode. A phase is D
 - [x] Acceptance: `pnpm dev` runs server+client; login works for both roles; schema migrated clean; all UI text from tm.json
 
 ## Phase 2 — Inventory & Purchasing
-- [ ] Categories CRUD; Products CRUD (code unique, scale-item flag, low-stock threshold, expiry, discount %, second price)
-- [ ] Internal code generator (SPEC §6.9) + shared code registry; QR/label PDF print with copies counter
-- [ ] StockBatch model flows; UnitPacks CRUD (SPEC §6.7 data)
-- [ ] Haryt goş (receiving) screen: multi-line cart → one invoice; TMT/USD purchase (rate snapshot); percent margin helper; options: pay-from-cashbox, supplier-credit (SPEC §6.8)
-- [ ] Üýtgetmek: edit product + batch fields; guarded delete
-- [ ] Stock views: Ammar (all batches, search, CSV), out-of-stock, low-stock (≤ threshold), expiring-soon (per category)
-- [ ] PLU export job (SPEC §7.3): file template + optional command, triggered on scale-item change and on demand
-- [ ] Acceptance: receive goods on supplier credit → supplier balance up + CashMove absent; receive with cashbox pay → CashMove expense written; CSV exports open in Excel
+- [x] Categories CRUD; Products CRUD (code unique, scale-item flag, low-stock threshold, expiry, discount %, second price)
+- [x] Internal code generator (SPEC §6.9) + shared code registry; QR/label PDF print with copies counter
+- [x] StockBatch model flows; UnitPacks CRUD (SPEC §6.7 data)
+- [x] Haryt goş (receiving) screen: multi-line cart → one invoice; TMT/USD purchase (rate snapshot); percent margin helper; options: pay-from-cashbox, supplier-credit (SPEC §6.8)
+- [x] Üýtgetmek: edit product + batch fields; guarded delete
+- [x] Stock views: Ammar (all batches, search, CSV), out-of-stock, low-stock (≤ threshold), expiring-soon (per category)
+- [x] PLU export job (SPEC §7.3): file template + optional command, triggered on scale-item change and on demand
+- [x] Acceptance: receive goods on supplier credit → supplier balance up + CashMove absent; receive with cashbox pay → CashMove expense written; CSV exports open in Excel
 
 ## Phase 3 — POS Core
 - [ ] FIFO engine in server (SPEC §6.2) as a pure, unit-tested service; LIFO honored via Settings flag; batchBreakdown stored per line
