@@ -1,26 +1,41 @@
 import { useTranslation } from 'react-i18next';
+import { NavLink, Route, Routes } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { LanguageSwitch } from '../components/LanguageSwitch';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { ComingSoon } from './ComingSoon';
+import { CategoriesPage } from './CategoriesPage';
+import { ProductsPage } from './ProductsPage';
+import { ProductFormPage } from './ProductFormPage';
+import { ReceivingPage } from './ReceivingPage';
+import { StockAmmarPage } from './StockAmmarPage';
+import { StockOutPage } from './StockOutPage';
+import { StockLowPage } from './StockLowPage';
+import { StockExpiringPage } from './StockExpiringPage';
 
-// Sidebar navigation keys (SPEC §9). Screens are built in later phases.
-const NAV_KEYS = [
-  'nav.sale',
-  'nav.goodsReceive',
-  'nav.warehouse',
-  'nav.cashRegister',
-  'nav.customerDebt',
-  'nav.supplierDebt',
-  'nav.returns',
-  'nav.stocktake',
-  'nav.revision',
-  'nav.secondShop',
-  'nav.recipes',
-  'nav.neededProducts',
-  'nav.currency',
-  'nav.reports',
-  'nav.users',
-  'nav.settings',
+// Sidebar navigation (SPEC §9). Screens not yet built fall back to ComingSoon.
+const NAV_ITEMS = [
+  { key: 'nav.sale', path: '/sale' },
+  { key: 'nav.products', path: '/products' },
+  { key: 'nav.categories', path: '/categories' },
+  { key: 'nav.goodsReceive', path: '/receiving' },
+  { key: 'nav.warehouse', path: '/stock/ammar' },
+  { key: 'product.outOfStock', path: '/stock/out-of-stock' },
+  { key: 'product.lowStock', path: '/stock/low-stock' },
+  { key: 'product.expiringSoon', path: '/stock/expiring-soon' },
+  { key: 'nav.cashRegister', path: '/cash' },
+  { key: 'nav.customerDebt', path: '/customer-debt' },
+  { key: 'nav.supplierDebt', path: '/supplier-debt' },
+  { key: 'nav.returns', path: '/returns' },
+  { key: 'nav.stocktake', path: '/stocktake' },
+  { key: 'nav.revision', path: '/revision' },
+  { key: 'nav.secondShop', path: '/second-shop' },
+  { key: 'nav.recipes', path: '/recipes' },
+  { key: 'nav.neededProducts', path: '/needed-products' },
+  { key: 'nav.currency', path: '/currency' },
+  { key: 'nav.reports', path: '/reports' },
+  { key: 'nav.users', path: '/users' },
+  { key: 'nav.settings', path: '/settings' },
 ] as const;
 
 export function BackOfficeShell() {
@@ -29,21 +44,26 @@ export function BackOfficeShell() {
 
   return (
     <div className="min-h-screen flex bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
-      <aside className="w-56 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-3">
+      <aside className="w-56 shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-3 overflow-y-auto">
         <div className="font-bold text-lg mb-4">{t('app.name')}</div>
         <nav className="space-y-1">
-          {NAV_KEYS.map((key) => (
-            <div
-              key={key}
-              className="px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm"
+          {NAV_ITEMS.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                `block px-3 py-2 rounded text-sm ${
+                  isActive ? 'bg-blue-600 text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`
+              }
             >
-              {t(key)}
-            </div>
+              {t(item.key)}
+            </NavLink>
           ))}
         </nav>
       </aside>
 
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
         <header className="h-14 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <div className="text-sm text-gray-500 dark:text-gray-400">
             {t('auth.welcome')}, {user?.username} ({t('auth.admin')})
@@ -59,10 +79,37 @@ export function BackOfficeShell() {
             </button>
           </div>
         </header>
-        <main className="flex-1 p-6">
-          <p className="text-gray-500 dark:text-gray-400">
-            {t('app.name')} — {t('reports.title')} ({t('app.loading')})
-          </p>
+        <main className="flex-1 p-6 overflow-y-auto">
+          <Routes>
+            <Route path="/products" element={<ProductsPage />} />
+            <Route path="/products/new" element={<ProductFormPage />} />
+            <Route path="/products/:id" element={<ProductFormPage />} />
+            <Route path="/categories" element={<CategoriesPage />} />
+            <Route path="/receiving" element={<ReceivingPage />} />
+            <Route path="/stock/ammar" element={<StockAmmarPage />} />
+            <Route path="/stock/out-of-stock" element={<StockOutPage />} />
+            <Route path="/stock/low-stock" element={<StockLowPage />} />
+            <Route path="/stock/expiring-soon" element={<StockExpiringPage />} />
+            {NAV_ITEMS.filter(
+              (i) =>
+                ![
+                  '/products',
+                  '/receiving',
+                  '/categories',
+                  '/stock/ammar',
+                  '/stock/out-of-stock',
+                  '/stock/low-stock',
+                  '/stock/expiring-soon',
+                ].includes(i.path),
+            ).map((item) => (
+              <Route
+                key={item.path}
+                path={item.path}
+                element={<ComingSoon titleKey={item.key} />}
+              />
+            ))}
+            <Route path="*" element={<ComingSoon titleKey="reports.title" />} />
+          </Routes>
         </main>
       </div>
     </div>

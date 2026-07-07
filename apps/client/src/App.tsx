@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from './store/auth';
-import { fetchSettings } from './api';
+import { fetchFirstRunStatus } from './api';
 import { LoginPage } from './pages/LoginPage';
 import { BackOfficeShell } from './pages/BackOfficeShell';
 import { PosShell } from './pages/PosShell';
@@ -11,8 +11,8 @@ export function App() {
   const [firstRunDone, setFirstRunDone] = useState<boolean | null>(null);
 
   useEffect(() => {
-    fetchSettings()
-      .then((s) => setFirstRunDone(s['app.firstRunDone'] === 'true'))
+    fetchFirstRunStatus()
+      .then(setFirstRunDone)
       .catch(() => setFirstRunDone(true)); // if unreachable, don't block login
   }, []);
 

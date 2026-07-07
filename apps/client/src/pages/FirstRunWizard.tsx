@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { saveSetting } from '../api';
+import { completeFirstRun } from '../api';
 import { LanguageSwitch } from '../components/LanguageSwitch';
 
 /**
@@ -12,14 +12,16 @@ export function FirstRunWizard({ onDone }: { onDone: () => void }) {
   const [mode, setMode] = useState<'SERVER' | 'CLIENT'>('SERVER');
   const [serverIp, setServerIp] = useState('');
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function finish() {
     setSaving(true);
+    setError(null);
     try {
-      await saveSetting('server.mode', mode);
-      if (mode === 'CLIENT') await saveSetting('server.ip', serverIp);
-      await saveSetting('app.firstRunDone', 'true');
+      await completeFirstRun(mode, mode === 'CLIENT' ? serverIp : undefined);
       onDone();
+    } catch {
+      setError(t('auth.invalidCredentials'));
     } finally {
       setSaving(false);
     }
@@ -76,6 +78,8 @@ export function FirstRunWizard({ onDone }: { onDone: () => void }) {
             />
           </div>
         )}
+
+        {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
         <button
           onClick={finish}
