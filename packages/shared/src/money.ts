@@ -50,6 +50,11 @@ export function sumMoney(values: Numeric[]): Decimal {
   return money(values.reduce<Decimal>((acc, v) => acc.plus(dec(v)), new Decimal(0)));
 }
 
+/** Sum a list of numeric-like values at quantity precision. */
+export function sumQty(values: Numeric[]): Decimal {
+  return qty(values.reduce<Decimal>((acc, v) => acc.plus(dec(v)), new Decimal(0)));
+}
+
 /**
  * Parse a legacy VARCHAR numeric: trim, strip spaces, `,`→`.`, empty→0.
  * Used by the migration CLI (Phase 7) and any user numeric input. SPEC §4.2.

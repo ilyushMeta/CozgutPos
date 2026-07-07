@@ -1,11 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import type { Prisma } from '@prisma/client';
-import { dec, qty } from '@cozgut/shared';
+import { dec, sumQty } from '@cozgut/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
-
-function sumRemaining(batches: { qtyRemaining: Prisma.Decimal }[]) {
-  return qty(batches.reduce((acc, b) => acc.plus(dec(b.qtyRemaining)), dec(0)));
-}
 
 /** Stock views (SPEC §5.4): Ammar, out-of-stock, low-stock, expiring-soon. */
 @Injectable()
@@ -30,14 +25,14 @@ export class StockViewsService {
   async outOfStock() {
     const products = await this.productsWithBatches();
     return products
-      .map((p) => ({ ...p, remaining: sumRemaining(p.batches) }))
+      .map((p) => ({ ...p, remaining: sumQty(p.batches.map((b) => b.qtyRemaining)) }))
       .filter((p) => p.remaining.isZero());
   }
 
   async lowStock() {
     const products = await this.productsWithBatches();
     return products
-      .map((p) => ({ ...p, remaining: sumRemaining(p.batches) }))
+      .map((p) => ({ ...p, remaining: sumQty(p.batches.map((b) => b.qtyRemaining)) }))
       .filter(
         (p) =>
           p.remaining.greaterThan(0) && p.remaining.lessThanOrEqualTo(dec(p.lowStockThreshold)),

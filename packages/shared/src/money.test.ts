@@ -4,6 +4,7 @@ import {
   qty,
   moneyStr,
   sumMoney,
+  sumQty,
   parseLegacyNumber,
   parseQtyInput,
   applyMargin,
@@ -31,6 +32,11 @@ describe('qty rounding (3dp)', () => {
   it('rounds to 3 places half up', () => {
     expect(qty('1.2345').toFixed(3)).toBe('1.235');
     expect(qty('1.2344').toFixed(3)).toBe('1.234');
+  });
+
+  it('sums at qty precision', () => {
+    expect(sumQty(['1.1115', '2.222']).toFixed(3)).toBe('3.334'); // 3.3335 -> half-up 3dp
+    expect(sumQty([10, 20, '5.5']).toFixed(3)).toBe('35.500');
   });
 });
 
