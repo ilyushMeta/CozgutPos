@@ -29,8 +29,29 @@ export class AuthService {
     await this.prisma.loginAudit.create({ data: { userId: user.id } });
     void this.plu.exportSafely(); // fire-and-forget (SPEC §5.1/§7.3), never blocks login
 
-    const authUser: AuthUser = { id: user.id, username: user.username, role: user.role };
+    const authUser: AuthUser = {
+      id: user.id,
+      username: user.username,
+      role: user.role,
+      mustResetPassword: user.mustResetPassword,
+    };
     return this.issueTokens(authUser);
+  }
+
+  /** Forced password change for migrated legacy accounts (SPEC §10 step 4).
+   * Re-issues tokens so the mustResetPassword flag in the access token clears immediately. */
+  async changePassword(userId: number, newPassword: string): Promise<AuthResult> {
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash, mustResetPassword: false },
+    });
+    return this.issueTokens({
+      id: user.id,
+      username: user.username,
+      role: user.role,
+      mustResetPassword: user.mustResetPassword,
+    });
   }
 
   async refresh(refreshToken: string): Promise<AuthResult> {
@@ -45,11 +66,21 @@ export class AuthService {
     const user = await this.users.findById(payload.sub);
     if (!user || !user.isActive) throw new UnauthorizedException('invalidToken');
 
-    return this.issueTokens({ id: user.id, username: user.username, role: user.role });
+    return this.issueTokens({
+      id: user.id,
+      username: user.username,
+      role: user.role,
+      mustResetPassword: user.mustResetPassword,
+    });
   }
 
   private async issueTokens(user: AuthUser): Promise<AuthResult> {
-    const payload: JwtPayload = { sub: user.id, username: user.username, role: user.role };
+    const payload: JwtPayload = {
+      sub: user.id,
+      username: user.username,
+      role: user.role,
+      mustResetPassword: user.mustResetPassword,
+    };
     const accessToken = await this.jwt.signAsync(payload, {
       secret: this.config.get<string>('JWT_ACCESS_SECRET'),
       expiresIn: this.config.get<string>('JWT_ACCESS_TTL', '15m'),

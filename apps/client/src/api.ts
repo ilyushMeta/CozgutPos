@@ -50,6 +50,11 @@ export async function login(username: string, password: string): Promise<AuthRes
   return data;
 }
 
+export async function changeOwnPassword(newPassword: string): Promise<AuthResult> {
+  const { data } = await api.post<AuthResult>('/auth/change-password', { newPassword });
+  return data;
+}
+
 export async function fetchLicenseStatus(): Promise<LicenseStatus> {
   const { data } = await api.get<LicenseStatus>('/license/status');
   return data;

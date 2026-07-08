@@ -62,13 +62,14 @@ enum StocktakeStatus {
 // ── Users & audit ─────────────────────────────────────────────────────────────
 
 model User {
-  id           Int      @id @default(autoincrement())
-  username     String   @unique @db.VarChar(64)
-  passwordHash String   @db.VarChar(255)
-  role         Role     @default(CASHIER)
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                Int      @id @default(autoincrement())
+  username          String   @unique @db.VarChar(64)
+  passwordHash      String   @db.VarChar(255)
+  role              Role     @default(CASHIER)
+  isActive          Boolean  @default(true)
+  mustResetPassword Boolean  @default(false) // SPEC §10 step 4: forced on migrated legacy users
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   loginAudits LoginAudit[]
   sales       Sale[]

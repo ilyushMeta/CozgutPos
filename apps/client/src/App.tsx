@@ -5,6 +5,7 @@ import { LoginPage } from './pages/LoginPage';
 import { BackOfficeShell } from './pages/BackOfficeShell';
 import { PosShell } from './pages/PosShell';
 import { FirstRunWizard } from './pages/FirstRunWizard';
+import { ForcePasswordResetModal } from './components/ForcePasswordResetModal';
 
 export function App() {
   const user = useAuthStore((s) => s.user);
@@ -19,6 +20,7 @@ export function App() {
   if (firstRunDone === null) return null;
   if (!firstRunDone) return <FirstRunWizard onDone={() => setFirstRunDone(true)} />;
   if (!user) return <LoginPage />;
+  if (user.mustResetPassword) return <ForcePasswordResetModal />;
 
   // Route by role (SPEC §5.1): ADMIN → back-office, CASHIER → POS.
   return user.role === 'ADMIN' ? <BackOfficeShell /> : <PosShell />;

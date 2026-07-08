@@ -27,7 +27,13 @@
     "welcome": "Hoş geldiňiz",
     "role": "Rol",
     "admin": "Admin",
-    "cashier": "Kassir"
+    "cashier": "Kassir",
+    "mustResetPasswordTitle": "Täze parol goýuň",
+    "mustResetPasswordBody": "Bu hasap köne ulgamdan geçirildi. Dowam etmezden ozal täze parol goýmaly.",
+    "newPassword": "Täze parol",
+    "confirmPassword": "Paroly gaýtalaň",
+    "passwordsDontMatch": "Parollar gabat gelenok",
+    "saveNewPassword": "Täze paroly ýatda sakla"
   },
   "license": {
     "remainingDays": "Galan günler",

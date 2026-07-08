@@ -8,6 +8,7 @@ export interface JwtPayload {
   sub: number;
   username: string;
   role: AuthUser['role'];
+  mustResetPassword?: boolean;
 }
 
 @Injectable()
@@ -21,6 +22,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   validate(payload: JwtPayload): AuthUser {
-    return { id: payload.sub, username: payload.username, role: payload.role };
+    return {
+      id: payload.sub,
+      username: payload.username,
+      role: payload.role,
+      mustResetPassword: payload.mustResetPassword,
+    };
   }
 }

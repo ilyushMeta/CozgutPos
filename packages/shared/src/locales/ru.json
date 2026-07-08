@@ -27,7 +27,13 @@
     "welcome": "Добро пожаловать",
     "role": "Роль",
     "admin": "Администратор",
-    "cashier": "Кассир"
+    "cashier": "Кассир",
+    "mustResetPasswordTitle": "Установите новый пароль",
+    "mustResetPasswordBody": "Эта учётная запись перенесена из старой системы. Перед продолжением нужно установить новый пароль.",
+    "newPassword": "Новый пароль",
+    "confirmPassword": "Повторите пароль",
+    "passwordsDontMatch": "Пароли не совпадают",
+    "saveNewPassword": "Сохранить новый пароль"
   },
   "license": {
     "remainingDays": "Осталось дней",

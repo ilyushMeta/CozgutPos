@@ -10,6 +10,7 @@ import { SettingsModule } from './settings/settings.module.js';
 import { RealtimeModule } from './realtime/realtime.module.js';
 import { JwtAuthGuard } from './auth/jwt-auth.guard.js';
 import { RolesGuard } from './auth/roles.guard.js';
+import { MustResetPasswordGuard } from './auth/must-reset-password.guard.js';
 import { HealthController } from './health.controller.js';
 import { CodesModule } from './codes/codes.module.js';
 import { CashModule } from './cash/cash.module.js';
@@ -69,8 +70,9 @@ import { BackupModule } from './backup/backup.module.js';
   ],
   controllers: [HealthController],
   providers: [
-    // Global guards: JWT everywhere (except @Public), then role checks.
+    // Global guards: JWT everywhere (except @Public), then must-reset-password, then role checks.
     { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: MustResetPasswordGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],

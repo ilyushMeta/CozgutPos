@@ -18,6 +18,7 @@ export const authUserSchema = z.object({
   id: z.number().int(),
   username: z.string(),
   role: z.nativeEnum(Role),
+  mustResetPassword: z.boolean().optional(),
 });
 export type AuthUser = z.infer<typeof authUserSchema>;
 
@@ -27,6 +28,11 @@ export const authResultSchema = z.object({
   user: authUserSchema,
 });
 export type AuthResult = z.infer<typeof authResultSchema>;
+
+export const changePasswordSchema = z.object({
+  newPassword: z.string().min(4).max(128),
+});
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 
 /** License status shown on the login screen. SPEC §5.1, §8. */
 export const licenseStatusSchema = z.object({

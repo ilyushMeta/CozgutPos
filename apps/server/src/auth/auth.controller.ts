@@ -1,9 +1,17 @@
 import { Body, Controller, Get, Post, UsePipes } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
-import { loginSchema, refreshSchema, type LoginInput, type RefreshInput } from '@cozgut/shared';
+import {
+  loginSchema,
+  refreshSchema,
+  changePasswordSchema,
+  type LoginInput,
+  type RefreshInput,
+  type ChangePasswordInput,
+} from '@cozgut/shared';
 import { AuthService } from './auth.service.js';
 import { Public } from './public.decorator.js';
 import { CurrentUser } from './current-user.decorator.js';
+import { SkipPasswordResetCheck } from './skip-password-reset-check.decorator.js';
 import { ZodValidationPipe } from '../common/zod-validation.pipe.js';
 import type { AuthUser } from '@cozgut/shared';
 
@@ -29,5 +37,12 @@ export class AuthController {
   @Get('me')
   me(@CurrentUser() user: AuthUser) {
     return user;
+  }
+
+  @SkipPasswordResetCheck()
+  @Post('change-password')
+  @UsePipes(new ZodValidationPipe(changePasswordSchema))
+  changePassword(@CurrentUser() user: AuthUser, @Body() body: ChangePasswordInput) {
+    return this.auth.changePassword(user.id, body.newPassword);
   }
 }
