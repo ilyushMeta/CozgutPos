@@ -12,6 +12,15 @@ import type {
   DebtPaymentInput,
   SupplierUpsertInput,
   SupplierPaymentInput,
+  OpenDayInput,
+  DepositInput,
+  WithdrawInput,
+  ReturnInput,
+  RevisionLineInput,
+  StocktakeScanInput,
+  SecondShopSaleInput,
+  RecipeInput,
+  NeededProductInput,
 } from '@cozgut/shared';
 import { useAuthStore } from './store/auth';
 
@@ -331,4 +340,178 @@ export async function openFakturPdf(saleId: number): Promise<void> {
   const url = URL.createObjectURL(data as Blob);
   window.open(url, '_blank');
   setTimeout(() => URL.revokeObjectURL(url), 60_000);
+}
+
+// ── Kassa (SPEC §5.7) ─────────────────────────────────────────────────────────
+
+export async function fetchCashToday() {
+  const { data } = await api.get('/cash/today');
+  return data as {
+    date: string;
+    openingBalance: string;
+    income: string;
+    expense: string;
+    closingBalance: string;
+  };
+}
+
+export async function fetchCashMoves(from?: string, to?: string) {
+  const { data } = await api.get('/cash/moves', { params: { from, to } });
+  return data as Array<{
+    id: number;
+    datetime: string;
+    type: string;
+    amount: string;
+    balanceBefore: string;
+    note: string | null;
+  }>;
+}
+
+export async function openCashDay(input: OpenDayInput) {
+  const { data } = await api.post('/cash/open', input);
+  return data;
+}
+
+export async function depositCash(input: DepositInput) {
+  const { data } = await api.post('/cash/deposit', input);
+  return data;
+}
+
+export async function withdrawCash(input: WithdrawInput) {
+  const { data } = await api.post('/cash/withdraw', input);
+  return data;
+}
+
+// ── Yzyna goýmak (SPEC §5.8/§6.12) ────────────────────────────────────────────
+
+export async function searchSoldLines(params: {
+  receiptNo?: number;
+  saleId?: number;
+  code?: string;
+  date?: string;
+}) {
+  const { data } = await api.get('/returns/search', { params });
+  return data as Array<{
+    saleLineId: number;
+    saleId: number;
+    receiptNo: number;
+    datetime: string;
+    productName: string;
+    productCode: string;
+    qty: string;
+    unitPrice: string;
+    lineTotal: string;
+    returnable: string;
+  }>;
+}
+
+export async function createReturn(input: ReturnInput) {
+  const { data } = await api.post('/returns', input);
+  return data;
+}
+
+// ── Rewiz (SPEC §5.9) ─────────────────────────────────────────────────────────
+
+export async function fetchSystemQty(productId: number) {
+  const { data } = await api.get(`/revision/${productId}/system-qty`);
+  return data as { productId: number; systemQty: string };
+}
+
+export async function createRevisionLine(input: RevisionLineInput) {
+  const { data } = await api.post('/revision/lines', input);
+  return data;
+}
+
+export async function listRevisionLines() {
+  const { data } = await api.get('/revision');
+  return data;
+}
+
+// ── Tükelleme (SPEC §5.9) ─────────────────────────────────────────────────────
+
+export async function startStocktake() {
+  const { data } = await api.post('/stocktake/start');
+  return data as { id: number; status: string };
+}
+
+export async function scanStocktake(stocktakeId: number, input: StocktakeScanInput) {
+  const { data } = await api.post(`/stocktake/${stocktakeId}/scan`, input);
+  return data;
+}
+
+export async function finishStocktake(stocktakeId: number) {
+  const { data } = await api.post(`/stocktake/${stocktakeId}/finish`);
+  return data;
+}
+
+export async function getStocktake(stocktakeId: number) {
+  const { data } = await api.get(`/stocktake/${stocktakeId}`);
+  return data as {
+    id: number;
+    status: string;
+    lines: Array<{
+      id: number;
+      productId: number;
+      countedQty: string;
+      systemQty: string;
+      diff: string;
+      product: { name: string; code: string };
+    }>;
+  };
+}
+
+// ── Ikinji dükan (SPEC §5.10/§6.11) ───────────────────────────────────────────
+
+export async function createSecondShopSale(input: SecondShopSaleInput) {
+  const { data } = await api.post('/second-shop/sales', input);
+  return data;
+}
+
+export async function fetchSecondShopReport(from?: string, to?: string) {
+  const { data } = await api.get('/second-shop/sales', { params: { from, to } });
+  return data as {
+    lines: Array<{
+      id: number;
+      saleId: number;
+      receiptNo: number;
+      datetime: string;
+      productName: string;
+      qty: string;
+      unitPrice: string;
+      lineTotal: string;
+    }>;
+    total: string;
+  };
+}
+
+// ── Önüm / Recipes (SPEC §5.12/§6.6) ──────────────────────────────────────────
+
+export async function listRecipes() {
+  const { data } = await api.get('/recipes');
+  return data;
+}
+
+export async function createRecipe(input: RecipeInput) {
+  const { data } = await api.post('/recipes', input);
+  return data;
+}
+
+export async function deleteRecipe(id: number) {
+  await api.delete(`/recipes/${id}`);
+}
+
+// ── Gerekli harytlar ───────────────────────────────────────────────────────────
+
+export async function listNeededProducts() {
+  const { data } = await api.get('/needed-products');
+  return data;
+}
+
+export async function createNeededProduct(input: NeededProductInput) {
+  const { data } = await api.post('/needed-products', input);
+  return data;
+}
+
+export async function deleteNeededProduct(id: number) {
+  await api.delete(`/needed-products/${id}`);
 }

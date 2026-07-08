@@ -157,7 +157,10 @@
     "income": "Приход",
     "expense": "Расход",
     "openingBalance": "Начальная сумма",
-    "reason": "Причина"
+    "reason": "Причина",
+    "openDay": "Открыть день",
+    "moves": "Движения",
+    "today": "Сегодня"
   },
   "debt": {
     "debtor": "Должник",
@@ -188,6 +191,44 @@
     "editTitle": "Изменить поставщика",
     "deleteBlocked": "У поставщика есть история движений, удалить нельзя",
     "payDebt": "Оплата долга поставщику"
+  },
+  "returns": {
+    "searchPlaceholder": "Поиск по номеру чека, ID продажи или коду",
+    "saleId": "ID продажи",
+    "returnQty": "Возвращаемое количество",
+    "returnable": "Можно вернуть",
+    "submit": "Вернуть",
+    "success": "Успешно возвращено"
+  },
+  "revision": {
+    "systemQty": "Количество по системе",
+    "countedQty": "Подсчитанное количество",
+    "zeroStock": "Обнулить склад",
+    "history": "История",
+    "match": "Совпадает"
+  },
+  "stocktake": {
+    "start": "Начать",
+    "scan": "Сканировать",
+    "finish": "Завершить",
+    "finished": "Завершено"
+  },
+  "secondShop": {
+    "sell": "Продать",
+    "report": "Отчёт",
+    "period": "Период",
+    "total": "Итого"
+  },
+  "recipe": {
+    "title": "Продукция",
+    "addNew": "Новая продукция",
+    "ingredients": "Состав",
+    "addIngredient": "Добавить ингредиент",
+    "buildFromCart": "Создать из корзины",
+    "name": "Название"
+  },
+  "neededProduct": {
+    "addNew": "Новый товар"
   },
   "settings": {
     "title": "Настройки",

@@ -19,6 +19,13 @@ import { SuppliersPage } from './SuppliersPage';
 import { SupplierDetailPage } from './SupplierDetailPage';
 import { DashboardPage } from './DashboardPage';
 import { SettingsPage } from './SettingsPage';
+import { CashPage } from './CashPage';
+import { ReturnsPage } from './ReturnsPage';
+import { RevisionPage } from './RevisionPage';
+import { StocktakePage } from './StocktakePage';
+import { SecondShopPage } from './SecondShopPage';
+import { RecipesPage } from './RecipesPage';
+import { NeededProductsPage } from './NeededProductsPage';
 
 // Sidebar navigation (SPEC §9). Screens not yet built fall back to ComingSoon.
 const NAV_ITEMS = [
@@ -104,6 +111,13 @@ export function BackOfficeShell() {
             <Route path="/supplier-debt/:id" element={<SupplierDetailPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/reports" element={<DashboardPage />} />
+            <Route path="/cash" element={<CashPage />} />
+            <Route path="/returns" element={<ReturnsPage />} />
+            <Route path="/revision" element={<RevisionPage />} />
+            <Route path="/stocktake" element={<StocktakePage />} />
+            <Route path="/second-shop" element={<SecondShopPage />} />
+            <Route path="/recipes" element={<RecipesPage />} />
+            <Route path="/needed-products" element={<NeededProductsPage />} />
             {NAV_ITEMS.filter(
               (i) =>
                 ![
@@ -119,6 +133,13 @@ export function BackOfficeShell() {
                   '/supplier-debt',
                   '/settings',
                   '/reports',
+                  '/cash',
+                  '/returns',
+                  '/revision',
+                  '/stocktake',
+                  '/second-shop',
+                  '/recipes',
+                  '/needed-products',
                 ].includes(i.path),
             ).map((item) => (
               <Route

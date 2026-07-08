@@ -157,7 +157,10 @@
     "income": "Girdeji",
     "expense": "Çykdajy",
     "openingBalance": "Başdaky pul",
-    "reason": "Sebäp"
+    "reason": "Sebäp",
+    "openDay": "Gün aç",
+    "moves": "Hereketler",
+    "today": "Şu gün"
   },
   "debt": {
     "debtor": "Karzçy",
@@ -188,6 +191,44 @@
     "editTitle": "Dükany üýtget",
     "deleteBlocked": "Bu dükanyň hereket taryhy bar, pozup bolmaýar",
     "payDebt": "Dükan karz tölemek"
+  },
+  "returns": {
+    "searchPlaceholder": "Faktur belgisi, Sowda ID ýa-da kod boýunça gözle",
+    "saleId": "Sowda ID",
+    "returnQty": "Gaýtarylýan mukdar",
+    "returnable": "Gaýtarylyp bolýar",
+    "submit": "Gaýtar",
+    "success": "Üstünlikli gaýtaryldy"
+  },
+  "revision": {
+    "systemQty": "Sistem mukdary",
+    "countedQty": "Sanalan mukdar",
+    "zeroStock": "Ammary boşatmak",
+    "history": "Taryh",
+    "match": "Gabat gelýär"
+  },
+  "stocktake": {
+    "start": "Başla",
+    "scan": "Skanirle",
+    "finish": "Tamamla",
+    "finished": "Tamamlandy"
+  },
+  "secondShop": {
+    "sell": "Satmak",
+    "report": "Hasabat",
+    "period": "Döwür",
+    "total": "Jemi"
+  },
+  "recipe": {
+    "title": "Önüm",
+    "addNew": "Täze önüm",
+    "ingredients": "Düzüm",
+    "addIngredient": "Ingredient goş",
+    "buildFromCart": "Forma-2 döret",
+    "name": "Ady"
+  },
+  "neededProduct": {
+    "addNew": "Täze haryt"
   },
   "settings": {
     "title": "Sazlamalar",

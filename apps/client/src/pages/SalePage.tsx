@@ -3,7 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { parseQtyInput } from '@cozgut/shared';
 import { useAuthStore } from '../store/auth';
-import { createSale, listDebtors, listProducts, openFakturPdf, priceCheck } from '../api';
+import {
+  createRecipe,
+  createSale,
+  listDebtors,
+  listProducts,
+  openFakturPdf,
+  priceCheck,
+} from '../api';
 
 const inputCls =
   'rounded border border-gray-300 dark:border-gray-600 bg-transparent px-2 py-1 text-sm';
@@ -187,6 +194,26 @@ export function SalePage() {
     },
     onError: (error) => setErrors(formatSaleError(t, error)),
   });
+
+  const buildRecipe = useMutation({
+    mutationFn: (name: string) =>
+      createRecipe({
+        name,
+        items: cart.map((l) => ({
+          ingredientProductId: l.productId,
+          qty: parseQtyInput(l.qty)?.toNumber() ?? Number(l.qty),
+        })),
+      }),
+    onSuccess: () => {
+      setCart([]);
+      qc.invalidateQueries({ queryKey: ['recipes'] });
+    },
+  });
+
+  function handleBuildRecipe() {
+    const name = window.prompt(t('recipe.name'));
+    if (name && name.trim()) buildRecipe.mutate(name.trim());
+  }
 
   // Global barcode-wedge capture (SPEC §7.2): only when focus isn't already in
   // a text field, so manual typing (e.g. into the cash amount) is untouched.
@@ -443,6 +470,13 @@ export function SalePage() {
         </button>
         <button onClick={() => setCart([])} className={`${secondaryBtnCls} w-full`}>
           {t('sale.clearCart')}
+        </button>
+        <button
+          onClick={handleBuildRecipe}
+          disabled={cart.length === 0 || buildRecipe.isPending}
+          className={`${secondaryBtnCls} w-full`}
+        >
+          {t('recipe.buildFromCart')}
         </button>
         <PriceCheckLauncher onPick={setPriceCheckProduct} />
       </div>
