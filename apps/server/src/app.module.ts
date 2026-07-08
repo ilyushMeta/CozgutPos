@@ -30,6 +30,8 @@ import { SecondShopModule } from './second-shop/second-shop.module.js';
 import { RecipesModule } from './recipes/recipes.module.js';
 import { NeededProductsModule } from './needed-products/needed-products.module.js';
 import { ReportsModule } from './reports/reports.module.js';
+import { DiscountsModule } from './discounts/discounts.module.js';
+import { CurrencyModule } from './currency/currency.module.js';
 
 @Module({
   imports: [
@@ -60,6 +62,8 @@ import { ReportsModule } from './reports/reports.module.js';
     RecipesModule,
     NeededProductsModule,
     ReportsModule,
+    DiscountsModule,
+    CurrencyModule,
   ],
   controllers: [HealthController],
   providers: [
