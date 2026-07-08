@@ -32,6 +32,7 @@ import { NeededProductsModule } from './needed-products/needed-products.module.j
 import { ReportsModule } from './reports/reports.module.js';
 import { DiscountsModule } from './discounts/discounts.module.js';
 import { CurrencyModule } from './currency/currency.module.js';
+import { BackupModule } from './backup/backup.module.js';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { CurrencyModule } from './currency/currency.module.js';
     ReportsModule,
     DiscountsModule,
     CurrencyModule,
+    BackupModule,
   ],
   controllers: [HealthController],
   providers: [
