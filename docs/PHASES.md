@@ -1,0 +1,67 @@
+# PHASES.md — Delivery Plan (tick boxes as tasks complete)
+
+Rules: one phase per session/branch. Start each phase in plan mode. A phase is DONE only when its acceptance boxes are ticked, tests pass, and the owner approved the summary. Details for every item: see the matching section in docs/SPEC.md.
+
+## Phase 1 — Foundation
+- [x] pnpm monorepo scaffold (apps/server, apps/client, packages/shared, packages/printer, tools/migrate-legacy) + ESLint/Prettier + docker-compose MySQL 8
+- [x] Prisma schema implementing ALL models from SPEC §4.1 + initial migration
+- [x] Seed script: admin user, demo categories/products/batches, PaymentDiscounts, ExchangeRate, Settings defaults
+- [x] Auth: bcrypt, JWT + refresh, roles ADMIN/CASHIER, route guards (API + client), LoginAudit
+- [x] i18n skeleton: i18next, `tm.json` seeded with SPEC §9 vocabulary, `ru.json` stubs, zero hardcoded strings check (lint rule or grep script)
+- [x] Login screen (TM), license module skeleton (License singleton, remaining-days display, expiry block message)
+- [x] Settings module (key/value table + UI shell) and first-run wizard: Server vs Client(server IP)
+- [x] Acceptance: `pnpm dev` runs server+client; login works for both roles; schema migrated clean; all UI text from tm.json
+
+## Phase 2 — Inventory & Purchasing
+- [x] Categories CRUD; Products CRUD (code unique, scale-item flag, low-stock threshold, expiry, discount %, second price)
+- [x] Internal code generator (SPEC §6.9) + shared code registry; QR/label PDF print with copies counter
+- [x] StockBatch model flows; UnitPacks CRUD (SPEC §6.7 data)
+- [x] Haryt goş (receiving) screen: multi-line cart → one invoice; TMT/USD purchase (rate snapshot); percent margin helper; options: pay-from-cashbox, supplier-credit (SPEC §6.8)
+- [x] Üýtgetmek: edit product + batch fields; guarded delete
+- [x] Stock views: Ammar (all batches, search, CSV), out-of-stock, low-stock (≤ threshold), expiring-soon (per category)
+- [x] PLU export job (SPEC §7.3): file template + optional command, triggered on scale-item change and on demand
+- [x] Acceptance: receive goods on supplier credit → supplier balance up + CashMove absent; receive with cashbox pay → CashMove expense written; CSV exports open in Excel
+
+## Phase 3 — POS Core
+- [x] FIFO engine in server (SPEC §6.2) as a pure, unit-tested service; LIFO honored via Settings flag; batchBreakdown stored per line
+- [x] Concurrency: transaction + locking; test proving two parallel sales cannot oversell one batch (SPEC §11)
+- [x] Söwda screen: scanner-first search with suggestions, cart with inline qty/unit-price/line-total edit, `a/b` fraction input, unit-pack selector, composite expansion (engine hookup in Phase 5)
+- [x] Payments: cash+card split (debt deferred to Phase 4 — see summary), live change, negative change = discount w/ % (SPEC §6.10), per-method PaymentDiscount
+- [x] Sale transaction (SPEC §6.3–6.4): validations w/ admin bypass checkboxes, atomic save, CashMove for cash part
+- [x] Receipt printing ESC/POS with SPEC §7.1 field set; copies counter; A4 faktur PDF; price-check popup (HarytMaglumat)
+- [x] Unit tests: money rounding, change/discount, FIFO consumption, pack qty math
+- [x] Acceptance checklist items 1 (partial: cash/card), 3, 5 from SPEC §13 pass
+
+## Phase 4 — Debts
+- [x] Debtors CRUD (auto code, +993 phone, TMT/USD account) with overdue color rules; Suppliers CRUD
+- [x] Debt sale completion (SPEC §6.5): balance in account currency, DebtSale, N-month DebtSchedule, optional SMS
+- [x] Karz tölemek: payment → balance + schedule oldest-first, CashMove in, receipt, optional SMS
+- [x] Dükan karz tölemek: pay supplier from cashbox; SupplierDebtMove ledger views
+- [x] Dashboard tiles: customer debt totals (TMT/$), supplier debt total; overdue notifications list (minimal — full Hasabatlar dashboard is Phase 6)
+- [x] SMS gateway client (SPEC §7.4) + Settings test button
+- [x] Acceptance: SPEC §13 item 1 fully passes incl. debt + schedule; unit tests for installment splitting
+
+## Phase 5 — Cash, Returns, Ops
+- [x] Kassa: day open (opening balance), deposit, withdraw (reason + report record), day/period movement views, live balance tile
+- [x] Returns (SPEC §6.12): search sold lines, restock exact batch, financial reversal, audit row
+- [x] Rewiz: count vs system, money impact rows, zero-stock action with audit
+- [x] Tükelleme: counting session, live shortage/surplus tables, apply adjustments, print/export
+- [x] Second shop (SPEC §6.11): simplified sale, own receipt sequence, back-office period views
+- [x] Recipes/Önüm (SPEC §6.6): build recipe from cart, composite sale deducts ingredients, production log
+- [x] Needed-products list CRUD
+- [x] Acceptance: SPEC §13 items 2 and 4 pass
+
+## Phase 6 — Reports & Admin
+- [x] DailySummary nightly job + on-demand rebuild
+- [x] Dashboard: today/period profit, 12-month profit chart, category breakdown
+- [x] Report tables + CSV: sold items (all filters), receipts w/ faktur reprint, cash moves, debt movements, login audit
+- [x] Users CRUD; Discounts screen; Currency screen w/ rate history; Backup/Restore (mysqldump → AES password ZIP, retention, schedule; restore incl. create-DB)
+- [x] License screen: activation codes add days, clock-rollback block, hardware fingerprint soft-check
+- [x] Acceptance: SPEC §13 items 7, 8 pass; charts match DailySummary numbers
+
+## Phase 7 — Migration & Hardening
+- [x] tools/migrate-legacy CLI per SPEC §10 (normalize varchar numerics, map all tables, preserve legacy ids)
+- [x] Reconciliation report: legacy vs new Σ stock qty/value, Σ debtor balances, Σ supplier balances — equal to 0.01 (SPEC §13 item 6)
+- [x] RU locale pass (real translations where owner provided, stubs elsewhere) — verified already at 293/293 key parity, no stubs found
+- [x] Tauri client build scaffold; server-as-service docs for Windows; LAN two-machine smoke test checklist (SPEC §13 item 10 — scaffolding/docs only, see summary for sandbox scoping notes)
+- [x] Full SPEC §13 checklist run — 9/10 boxes ticked; item 10 (literal two-machine LAN run) needs real shop hardware, not executable in this sandbox — see `docs/LAN_SMOKE_TEST.md`
