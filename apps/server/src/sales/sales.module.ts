@@ -22,6 +22,6 @@ import { SmsModule } from '../sms/sms.module.js';
   ],
   controllers: [SalesController],
   providers: [SalesService, SalesValidationService],
-  exports: [SalesService],
+  exports: [SalesService, SalesValidationService],
 })
 export class SalesModule {}
