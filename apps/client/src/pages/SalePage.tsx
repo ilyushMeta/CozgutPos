@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { parseQtyInput } from '@cozgut/shared';
 import { useAuthStore } from '../store/auth';
-import { createSale, listProducts, openFakturPdf, priceCheck } from '../api';
+import { createSale, listDebtors, listProducts, openFakturPdf, priceCheck } from '../api';
 
 const inputCls =
   'rounded border border-gray-300 dark:border-gray-600 bg-transparent px-2 py-1 text-sm';
@@ -46,6 +46,8 @@ function formatSaleError(t: (key: string, opts?: any) => string, error: any): st
       return [t('sale.emptyCart')];
     case 'NO_PAYMENT':
       return [t('sale.selectPayment')];
+    case 'DEBTOR_REQUIRED':
+      return [t('sale.debtorRequired')];
     case 'INSUFFICIENT_STOCK':
       return (body.shortages ?? []).map(
         (s: any) => `${s.productName}: ${t('sale.shortage', { count: Number(s.shortfall) })}`,
@@ -68,6 +70,11 @@ export function SalePage() {
   const [search, setSearch] = useState('');
   const [paidCash, setPaidCash] = useState('');
   const [paidCard, setPaidCard] = useState('');
+  const [paidDebt, setPaidDebt] = useState('');
+  const [debtor, setDebtor] = useState<{ id: number; name: string } | null>(null);
+  const [dueDate, setDueDate] = useState('');
+  const [noDueDate, setNoDueDate] = useState(false);
+  const [sendSms, setSendSms] = useState(false);
   const [skipStockCheck, setSkipStockCheck] = useState(false);
   const [allowBelowCost, setAllowBelowCost] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
@@ -138,7 +145,8 @@ export function SalePage() {
   const total = cart.reduce((sum, l) => sum + lineTotalOf(l), 0);
   const cash = Number(paidCash) || 0;
   const card = Number(paidCard) || 0;
-  const due = total - card;
+  const debt = Number(paidDebt) || 0;
+  const due = total - card - debt;
   const change = cash - due;
   const displayChange = change >= 0 ? change : 0;
   const displayDiscount = change < 0 ? -change : 0;
@@ -154,6 +162,11 @@ export function SalePage() {
         })),
         paidCash: cash,
         paidCard: card,
+        paidDebt: debt,
+        debtorId: debtor?.id,
+        dueDate: !noDueDate && dueDate ? new Date(dueDate) : undefined,
+        noDueDate,
+        sendSms,
         skipStockCheck,
         allowBelowCost,
       } as any),
@@ -162,9 +175,15 @@ export function SalePage() {
       setCart([]);
       setPaidCash('');
       setPaidCard('');
+      setPaidDebt('');
+      setDebtor(null);
+      setDueDate('');
+      setNoDueDate(false);
+      setSendSms(false);
       setErrors([]);
       qc.invalidateQueries({ queryKey: ['stock'] });
       qc.invalidateQueries({ queryKey: ['products'] });
+      qc.invalidateQueries({ queryKey: ['debtors'] });
     },
     onError: (error) => setErrors(formatSaleError(t, error)),
   });
@@ -371,6 +390,43 @@ export function SalePage() {
             onChange={(e) => setPaidCard(e.target.value)}
             className={`${inputCls} w-full mb-3`}
           />
+          <label className="block text-sm mb-1">{t('sale.debt')}</label>
+          <input
+            value={paidDebt}
+            onChange={(e) => setPaidDebt(e.target.value)}
+            className={`${inputCls} w-full mb-3`}
+          />
+
+          {debt > 0 && (
+            <div className="mb-3 space-y-2">
+              <DebtorPicker selected={debtor} onSelect={setDebtor} />
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={noDueDate}
+                  onChange={(e) => setNoDueDate(e.target.checked)}
+                />
+                {t('sale.noDueDate')}
+              </label>
+              {!noDueDate && (
+                <input
+                  type="date"
+                  value={dueDate}
+                  onChange={(e) => setDueDate(e.target.value)}
+                  className={`${inputCls} w-full`}
+                />
+              )}
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={sendSms}
+                  onChange={(e) => setSendSms(e.target.checked)}
+                />
+                {t('sale.sms')}
+              </label>
+            </div>
+          )}
+
           <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">
             {displayDiscount > 0
               ? `${t('sale.discountLabel')}: ${displayDiscount.toFixed(2)} (${((displayDiscount / total) * 100 || 0).toFixed(2)}%)`
@@ -393,6 +449,61 @@ export function SalePage() {
 
       {priceCheckProduct && (
         <PriceCheckModal product={priceCheckProduct} onClose={() => setPriceCheckProduct(null)} />
+      )}
+    </div>
+  );
+}
+
+function DebtorPicker({
+  selected,
+  onSelect,
+}: {
+  selected: { id: number; name: string } | null;
+  onSelect: (d: { id: number; name: string } | null) => void;
+}) {
+  const { t } = useTranslation();
+  const [term, setTerm] = useState('');
+  const { data: results = [] } = useQuery({
+    queryKey: ['pos-debtor-search', term],
+    queryFn: () => listDebtors(term),
+    enabled: term.length > 0 && !selected,
+  });
+
+  if (selected) {
+    return (
+      <div className="flex items-center justify-between text-sm bg-gray-100 dark:bg-gray-700 rounded px-2 py-1">
+        <span>{selected.name}</span>
+        <button onClick={() => onSelect(null)} className="text-red-600 hover:underline text-xs">
+          {t('sale.remove')}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative">
+      <input
+        value={term}
+        onChange={(e) => setTerm(e.target.value)}
+        placeholder={t('sale.selectDebtor')}
+        className={`${inputCls} w-full`}
+      />
+      {results.length > 0 && (
+        <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 rounded shadow-lg border border-gray-200 dark:border-gray-700 max-h-48 overflow-y-auto">
+          {results.map((d) => (
+            <button
+              key={d.id}
+              onClick={() => {
+                onSelect({ id: d.id, name: d.name });
+                setTerm('');
+              }}
+              className="w-full text-left px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm flex justify-between"
+            >
+              <span>{d.name}</span>
+              <span className="text-gray-400">{d.code}</span>
+            </button>
+          ))}
+        </div>
       )}
     </div>
   );

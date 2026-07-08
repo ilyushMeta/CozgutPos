@@ -145,7 +145,9 @@
     "belowCostError": "{{name}}: цена ({{price}}) ниже себестоимости ({{cost}})",
     "lastReceipt": "Последний чек",
     "addToCart": "В корзину",
-    "remove": "Удалить"
+    "remove": "Удалить",
+    "debtorRequired": "Выберите должника для оплаты в долг",
+    "selectDebtor": "Выбрать должника"
   },
   "cash": {
     "title": "Касса",
@@ -170,7 +172,22 @@
     "note": "Примечание",
     "weOwe": "Наш долг магазину",
     "owedToUs": "Нам должны",
-    "overdue": "Просрочено"
+    "overdue": "Просрочено",
+    "addNew": "Новый должник",
+    "editTitle": "Изменить должника",
+    "currency": "Валюта",
+    "searchPlaceholder": "Поиск по имени или коду",
+    "amount": "Сумма",
+    "sales": "Продажи",
+    "payments": "Платежи",
+    "detail": "Подробно",
+    "deleteBlocked": "У должника есть история, удалить нельзя"
+  },
+  "supplier": {
+    "addNew": "Новый поставщик",
+    "editTitle": "Изменить поставщика",
+    "deleteBlocked": "У поставщика есть история движений, удалить нельзя",
+    "payDebt": "Оплата долга поставщику"
   },
   "settings": {
     "title": "Настройки",
@@ -188,6 +205,10 @@
     "smsToken": "SMS токен",
     "language": "Язык",
     "testSms": "Тест SMS",
+    "testPhone": "Тестовый телефон",
+    "testMessage": "Тестовое сообщение",
+    "smsSent": "Отправлено",
+    "smsFailed": "Не отправлено: {{reason}}",
     "firstRun": {
       "title": "Первичная настройка",
       "choose": "Выберите режим работы",
@@ -204,7 +225,10 @@
     "soldItems": "Проданные товары",
     "receipts": "Чеки",
     "loginAudit": "Журнал входов",
-    "profitability": "Рентабельность"
+    "profitability": "Рентабельность",
+    "customerDebtTotal": "Долги клиентов",
+    "supplierDebtTotal": "Долги поставщикам",
+    "overdueDebtors": "Просроченные должники"
   },
   "common": {
     "date": "Дата",

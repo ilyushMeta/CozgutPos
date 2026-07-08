@@ -4,10 +4,12 @@ import { useTranslation } from 'react-i18next';
 interface DataTableProps<T> {
   data: T[];
   columns: ColumnDef<T, any>[];
+  /** Extra classes for a given row, e.g. red for overdue debts (SPEC §5.5/§9). */
+  rowClassName?: (row: T) => string;
 }
 
 /** Thin, shared TanStack Table wrapper (CLAUDE.md fixed stack) for simple back-office lists. */
-export function DataTable<T>({ data, columns }: DataTableProps<T>) {
+export function DataTable<T>({ data, columns, rowClassName }: DataTableProps<T>) {
   const { t } = useTranslation();
   const table = useReactTable({ data, columns, getCoreRowModel: getCoreRowModel() });
 
@@ -39,7 +41,7 @@ export function DataTable<T>({ data, columns }: DataTableProps<T>) {
           {table.getRowModel().rows.map((row) => (
             <tr
               key={row.id}
-              className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+              className={`border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 ${rowClassName?.(row.original) ?? ''}`}
             >
               {row.getVisibleCells().map((cell) => (
                 <td key={cell.id} className="py-2 px-3 whitespace-nowrap">

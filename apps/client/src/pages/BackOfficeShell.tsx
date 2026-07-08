@@ -13,6 +13,12 @@ import { StockAmmarPage } from './StockAmmarPage';
 import { StockOutPage } from './StockOutPage';
 import { StockLowPage } from './StockLowPage';
 import { StockExpiringPage } from './StockExpiringPage';
+import { DebtorsPage } from './DebtorsPage';
+import { DebtorDetailPage } from './DebtorDetailPage';
+import { SuppliersPage } from './SuppliersPage';
+import { SupplierDetailPage } from './SupplierDetailPage';
+import { DashboardPage } from './DashboardPage';
+import { SettingsPage } from './SettingsPage';
 
 // Sidebar navigation (SPEC §9). Screens not yet built fall back to ComingSoon.
 const NAV_ITEMS = [
@@ -92,6 +98,12 @@ export function BackOfficeShell() {
             <Route path="/stock/out-of-stock" element={<StockOutPage />} />
             <Route path="/stock/low-stock" element={<StockLowPage />} />
             <Route path="/stock/expiring-soon" element={<StockExpiringPage />} />
+            <Route path="/customer-debt" element={<DebtorsPage />} />
+            <Route path="/customer-debt/:id" element={<DebtorDetailPage />} />
+            <Route path="/supplier-debt" element={<SuppliersPage />} />
+            <Route path="/supplier-debt/:id" element={<SupplierDetailPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/reports" element={<DashboardPage />} />
             {NAV_ITEMS.filter(
               (i) =>
                 ![
@@ -103,6 +115,10 @@ export function BackOfficeShell() {
                   '/stock/out-of-stock',
                   '/stock/low-stock',
                   '/stock/expiring-soon',
+                  '/customer-debt',
+                  '/supplier-debt',
+                  '/settings',
+                  '/reports',
                 ].includes(i.path),
             ).map((item) => (
               <Route
@@ -111,7 +127,7 @@ export function BackOfficeShell() {
                 element={<ComingSoon titleKey={item.key} />}
               />
             ))}
-            <Route path="*" element={<ComingSoon titleKey="reports.title" />} />
+            <Route path="*" element={<DashboardPage />} />
           </Routes>
         </main>
       </div>

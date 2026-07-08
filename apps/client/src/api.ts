@@ -8,6 +8,10 @@ import type {
   ReceivingInput,
   StockBatchUpdateInput,
   CreateSaleInput,
+  DebtorInput,
+  DebtPaymentInput,
+  SupplierUpsertInput,
+  SupplierPaymentInput,
 } from '@cozgut/shared';
 import { useAuthStore } from './store/auth';
 
@@ -172,11 +176,99 @@ export async function submitReceiving(input: ReceivingInput) {
   return data;
 }
 
-// ── Suppliers (minimal read — full CRUD is Phase 4) ──────────────────────────
+// ── Suppliers / Karz dükan (SPEC §5.6) ───────────────────────────────────────
 
 export async function listSuppliers() {
   const { data } = await api.get('/suppliers');
   return data as { id: number; code: string; name: string; balance: string }[];
+}
+
+export async function getSupplier(id: number) {
+  const { data } = await api.get(`/suppliers/${id}`);
+  return data;
+}
+
+export async function generateSupplierCode() {
+  const { data } = await api.post('/suppliers/generate-code');
+  return data as { code: string };
+}
+
+export async function createSupplier(input: SupplierUpsertInput) {
+  const { data } = await api.post('/suppliers', input);
+  return data;
+}
+
+export async function updateSupplier(id: number, input: SupplierUpsertInput) {
+  const { data } = await api.put(`/suppliers/${id}`, input);
+  return data;
+}
+
+export async function deleteSupplier(id: number) {
+  await api.delete(`/suppliers/${id}`);
+}
+
+export async function listSupplierMoves(id: number) {
+  const { data } = await api.get(`/suppliers/${id}/moves`);
+  return data;
+}
+
+export async function paySupplierDebt(id: number, input: SupplierPaymentInput) {
+  const { data } = await api.post(`/suppliers/${id}/pay`, input);
+  return data;
+}
+
+// ── Debtors / Karz klient (SPEC §5.5) ────────────────────────────────────────
+
+export async function listDebtors(search?: string) {
+  const { data } = await api.get('/debtors', { params: search ? { search } : undefined });
+  return data as Array<{
+    id: number;
+    code: string;
+    name: string;
+    phone: string | null;
+    note: string | null;
+    accountCurrency: 'TMT' | 'USD';
+    balance: string;
+    overdueAmount: string;
+    isOverdue: boolean;
+    nextDueDate: string | null;
+  }>;
+}
+
+export async function getDebtor(id: number) {
+  const { data } = await api.get(`/debtors/${id}`);
+  return data;
+}
+
+export async function generateDebtorCode() {
+  const { data } = await api.post('/debtors/generate-code');
+  return data as { code: string };
+}
+
+export async function createDebtor(input: DebtorInput) {
+  const { data } = await api.post('/debtors', input);
+  return data;
+}
+
+export async function updateDebtor(id: number, input: DebtorInput) {
+  const { data } = await api.put(`/debtors/${id}`, input);
+  return data;
+}
+
+export async function deleteDebtor(id: number) {
+  await api.delete(`/debtors/${id}`);
+}
+
+export async function payDebtorDebt(id: number, input: DebtPaymentInput) {
+  const { data } = await api.post(`/debtors/${id}/pay`, input);
+  return data;
+}
+
+// ── SMS gateway (SPEC §7.4) ───────────────────────────────────────────────────
+
+export async function testSms(to: string, message?: string) {
+  const { data } = await api.post('/sms/test', { to, message });
+  return data as { sent: boolean; reason?: string };
 }
 
 // ── Stock views (SPEC §5.4) ──────────────────────────────────────────────────
