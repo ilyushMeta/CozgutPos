@@ -2,9 +2,16 @@ import { describe, it, expect, vi } from 'vitest';
 import { CodesService } from './codes.service.js';
 
 /** In-memory Prisma stub mirroring the real atomic-increment semantics. */
-function makePrisma(initial: Record<string, number> = {}, existingCodes: string[] = []) {
+function makePrisma(
+  initial: Record<string, number> = {},
+  existingCodes: string[] = [],
+  existingDebtorCodes: string[] = [],
+  existingSupplierCodes: string[] = [],
+) {
   const seqs = { ...initial };
   const products = new Set(existingCodes);
+  const debtors = new Set(existingDebtorCodes);
+  const suppliers = new Set(existingSupplierCodes);
   return {
     codeSequence: {
       upsert: vi.fn(async ({ where, create }: any) => {
@@ -19,6 +26,16 @@ function makePrisma(initial: Record<string, number> = {}, existingCodes: string[
     product: {
       findUnique: vi.fn(async ({ where }: any) =>
         products.has(where.code) ? { id: 1, code: where.code } : null,
+      ),
+    },
+    customer: {
+      findUnique: vi.fn(async ({ where }: any) =>
+        debtors.has(where.code) ? { id: 1, code: where.code } : null,
+      ),
+    },
+    supplier: {
+      findUnique: vi.fn(async ({ where }: any) =>
+        suppliers.has(where.code) ? { id: 1, code: where.code } : null,
       ),
     },
   } as any;
@@ -53,5 +70,19 @@ describe('CodesService (SPEC §6.9)', () => {
     const svc = new CodesService(prisma);
     const code = await svc.generateUniqueProductCode();
     expect(code).toBe('3002');
+  });
+
+  it('generateUniqueDebtorCode skips codes already taken', async () => {
+    const prisma = makePrisma({ debtor: 1 }, [], ['1']);
+    const svc = new CodesService(prisma);
+    const code = await svc.generateUniqueDebtorCode();
+    expect(code).toBe('2');
+  });
+
+  it('generateUniqueSupplierCode skips codes already taken', async () => {
+    const prisma = makePrisma({ supplier: 1 }, [], [], ['1', '2']);
+    const svc = new CodesService(prisma);
+    const code = await svc.generateUniqueSupplierCode();
+    expect(code).toBe('3');
   });
 });

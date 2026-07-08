@@ -32,4 +32,22 @@ export class CodesService {
       if (!exists) return candidate;
     }
   }
+
+  /** Next debtor (karzçy) code, skipping any collision (SPEC §6.9 code pools). */
+  async generateUniqueDebtorCode(): Promise<string> {
+    for (;;) {
+      const candidate = String(await this.next('debtor'));
+      const exists = await this.prisma.customer.findUnique({ where: { code: candidate } });
+      if (!exists) return candidate;
+    }
+  }
+
+  /** Next supplier (karz dükan) code, skipping any collision (SPEC §6.9 code pools). */
+  async generateUniqueSupplierCode(): Promise<string> {
+    for (;;) {
+      const candidate = String(await this.next('supplier'));
+      const exists = await this.prisma.supplier.findUnique({ where: { code: candidate } });
+      if (!exists) return candidate;
+    }
+  }
 }

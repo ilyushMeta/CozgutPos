@@ -22,6 +22,8 @@ import { SuppliersModule } from './suppliers/suppliers.module.js';
 import { FifoModule } from './fifo/fifo.module.js';
 import { SalesModule } from './sales/sales.module.js';
 import { PrintingModule } from './printing/printing.module.js';
+import { SmsModule } from './sms/sms.module.js';
+import { DebtorsModule } from './debtors/debtors.module.js';
 
 @Module({
   imports: [
@@ -44,6 +46,8 @@ import { PrintingModule } from './printing/printing.module.js';
     FifoModule,
     SalesModule,
     PrintingModule,
+    SmsModule,
+    DebtorsModule,
   ],
   controllers: [HealthController],
   providers: [

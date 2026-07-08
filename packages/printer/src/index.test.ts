@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { renderReceipt, type ReceiptData } from './index.js';
+import { renderReceipt, renderDebtPaymentReceipt, type ReceiptData } from './index.js';
 
 const BASE: ReceiptData = {
   shopHeader: 'Çözgüt Dükany',
@@ -73,5 +73,36 @@ describe('renderReceipt (SPEC §7.1 field set)', () => {
       'Suw 0.5L',
       '  1.000 x 3.00 = 3.00',
     ]);
+  });
+});
+
+describe('renderDebtPaymentReceipt (SPEC §5.5 Karz tölemek)', () => {
+  it('includes debtor name, amount, and new balance with the currency suffix', () => {
+    const doc = renderDebtPaymentReceipt({
+      shopHeader: 'Çözgüt Dükany',
+      date: '2026-07-07',
+      time: '12:00',
+      debtorName: 'Aman',
+      amount: '50.00',
+      currency: 'TMT',
+      newBalance: '100.00',
+    });
+    expect(doc.header).toBe('Çözgüt Dükany');
+    expect(doc.items).toEqual(['Alyjy: Aman']);
+    expect(doc.totals).toEqual(['Tölendi: 50.00 TMT', 'Umumy hasap: 100.00 TMT']);
+  });
+
+  it('includes an optional note line', () => {
+    const doc = renderDebtPaymentReceipt({
+      shopHeader: 'Çözgüt Dükany',
+      date: '2026-07-07',
+      time: '12:00',
+      debtorName: 'Aman',
+      amount: '50.00',
+      currency: '$',
+      newBalance: '10.00',
+      note: 'nagt',
+    });
+    expect(doc.totals).toContain('Bellik: nagt');
   });
 });

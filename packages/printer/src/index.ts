@@ -71,3 +71,30 @@ export function renderReceipt(data: ReceiptData): ReceiptDocument {
     footer: 'Sag boluň!',
   };
 }
+
+/** Karz tölemek confirmation slip (SPEC §5.5) — a standalone payment receipt,
+ * not tied to a Sale. `currency` is a display suffix, e.g. "TMT" or "$". */
+export interface DebtPaymentReceiptData {
+  shopHeader: string;
+  date: string;
+  time: string;
+  debtorName: string;
+  amount: string;
+  currency: string;
+  newBalance: string;
+  note?: string;
+}
+
+export function renderDebtPaymentReceipt(data: DebtPaymentReceiptData): ReceiptDocument {
+  return {
+    header: data.shopHeader,
+    meta: [`${data.date} ${data.time}`],
+    items: [`Alyjy: ${data.debtorName}`],
+    totals: [
+      `Tölendi: ${data.amount} ${data.currency}`,
+      `Umumy hasap: ${data.newBalance} ${data.currency}`,
+      ...(data.note ? [`Bellik: ${data.note}`] : []),
+    ],
+    footer: 'Sag boluň!',
+  };
+}

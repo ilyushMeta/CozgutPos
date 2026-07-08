@@ -1,6 +1,12 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ThermalPrinter, PrinterTypes } from 'node-thermal-printer';
-import { renderReceipt, type ReceiptData } from '@cozgut/printer';
+import {
+  renderReceipt,
+  renderDebtPaymentReceipt,
+  type ReceiptData,
+  type ReceiptDocument,
+  type DebtPaymentReceiptData,
+} from '@cozgut/printer';
 import { dec, money, SettingKey } from '@cozgut/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { SettingsService } from '../settings/settings.service.js';
@@ -59,19 +65,39 @@ export class PrintingService {
     saleId: number,
     copies?: number,
   ): Promise<{ printed: boolean; reason?: string }> {
-    const interfaceStr = await this.settings.get(SettingKey.PRINTER_NAME);
-    if (!interfaceStr) return { printed: false, reason: 'printer not configured' };
-
     const count = copies ?? Number((await this.settings.get(SettingKey.PRINT_COPIES)) ?? '1');
     const data = await this.buildReceiptData(saleId);
-    const doc = renderReceipt(data);
+    return this.printDocument(renderReceipt(data), count);
+  }
+
+  /** Karz tölemek confirmation slip (SPEC §5.5) — same soft-fail contract as printReceipt. */
+  async printDebtPaymentReceipt(
+    data: Omit<DebtPaymentReceiptData, 'shopHeader' | 'date' | 'time'>,
+  ): Promise<{ printed: boolean; reason?: string }> {
+    const shopHeader = (await this.settings.get(SettingKey.SHOP_HEADER)) ?? 'Çözgüt';
+    const now = new Date();
+    const doc = renderDebtPaymentReceipt({
+      ...data,
+      shopHeader,
+      date: now.toISOString().slice(0, 10),
+      time: now.toISOString().slice(11, 16),
+    });
+    return this.printDocument(doc, 1);
+  }
+
+  private async printDocument(
+    doc: ReceiptDocument,
+    copies: number,
+  ): Promise<{ printed: boolean; reason?: string }> {
+    const interfaceStr = await this.settings.get(SettingKey.PRINTER_NAME);
+    if (!interfaceStr) return { printed: false, reason: 'printer not configured' };
 
     try {
       const printer = new ThermalPrinter({ type: PrinterTypes.EPSON, interface: interfaceStr });
       const connected = await printer.isPrinterConnected();
       if (!connected) return { printed: false, reason: 'printer unreachable' };
 
-      for (let i = 0; i < Math.max(1, count); i++) {
+      for (let i = 0; i < Math.max(1, copies); i++) {
         if (i > 0) printer.clear();
         printer.alignCenter();
         printer.bold(true);
