@@ -24,6 +24,7 @@ import { SalesModule } from './sales/sales.module.js';
 import { PrintingModule } from './printing/printing.module.js';
 import { SmsModule } from './sms/sms.module.js';
 import { DebtorsModule } from './debtors/debtors.module.js';
+import { ReturnsModule } from './returns/returns.module.js';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { DebtorsModule } from './debtors/debtors.module.js';
     PrintingModule,
     SmsModule,
     DebtorsModule,
+    ReturnsModule,
   ],
   controllers: [HealthController],
   providers: [
