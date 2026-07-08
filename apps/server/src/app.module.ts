@@ -29,6 +29,7 @@ import { RevisionModule } from './revision/revision.module.js';
 import { SecondShopModule } from './second-shop/second-shop.module.js';
 import { RecipesModule } from './recipes/recipes.module.js';
 import { NeededProductsModule } from './needed-products/needed-products.module.js';
+import { ReportsModule } from './reports/reports.module.js';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { NeededProductsModule } from './needed-products/needed-products.module.j
     SecondShopModule,
     RecipesModule,
     NeededProductsModule,
+    ReportsModule,
   ],
   controllers: [HealthController],
   providers: [
