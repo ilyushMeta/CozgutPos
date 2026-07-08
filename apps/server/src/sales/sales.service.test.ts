@@ -326,3 +326,68 @@ describe('SalesService.createSale — debt (SPEC §6.5)', () => {
     expect(deps.sms.sendSafely).not.toHaveBeenCalled();
   });
 });
+
+describe('SalesService.createSale — composite (Önüm) lines (SPEC §6.6)', () => {
+  it('deducts each RecipeItem ingredient via FifoService and sums their COGS', async () => {
+    const compositeLine = makeResolvedLine({
+      productId: 10,
+      productName: 'Kompozit haryt',
+      qty: qty(2),
+      baseQty: qty(2),
+      unitPrice: '30.00',
+      isComposite: true,
+      recipeItems: [
+        { ingredientProductId: 1, qty: dec('2') }, // 2 per composite unit
+        { ingredientProductId: 2, qty: dec('1') }, // 1 per composite unit
+      ],
+    });
+    const deps = makeDeps({ resolvedLines: [compositeLine] });
+    deps.fifo.deduct = vi.fn(async (_tx: any, productId: number) => {
+      if (productId === 1) {
+        return { breakdown: [{ batchId: 1, qty: '4.000', buyPrice: '3.00' }], cogs: dec('12.00') };
+      }
+      return { breakdown: [{ batchId: 2, qty: '2.000', buyPrice: '10.00' }], cogs: dec('20.00') };
+    });
+    const svc = makeService(deps);
+
+    const result = await svc.createSale(
+      { lines: [{ productId: 10, qty: 2, unitPrice: 30 }], paidCash: 60, paidCard: 0 } as any,
+      7,
+    );
+
+    // ingredient 1: 2 per unit * 2 units = 4; ingredient 2: 1 per unit * 2 units = 2
+    expect(deps.fifo.deduct).toHaveBeenCalledWith(deps.tx, 1, dec('4'), 'fifo');
+    expect(deps.fifo.deduct).toHaveBeenCalledWith(deps.tx, 2, dec('2'), 'fifo');
+    expect(result.total).toBe('60.00'); // 2 * 30.00
+    expect(result.cogsTotal).toBe('32.00'); // 12 + 20
+    expect(deps.created.lines[0].batchBreakdown).toEqual({
+      composite: true,
+      ingredients: [
+        { ingredientProductId: 1, breakdown: [{ batchId: 1, qty: '4.000', buyPrice: '3.00' }] },
+        { ingredientProductId: 2, breakdown: [{ batchId: 2, qty: '2.000', buyPrice: '10.00' }] },
+      ],
+    });
+  });
+
+  it('maps an ingredient shortage to the same structured INSUFFICIENT_STOCK error', async () => {
+    const compositeLine = makeResolvedLine({
+      productId: 10,
+      isComposite: true,
+      recipeItems: [{ ingredientProductId: 1, qty: dec('2') }],
+    });
+    const deps = makeDeps({ resolvedLines: [compositeLine] });
+    deps.fifo.deduct = vi.fn(async () => {
+      throw new FifoInsufficientStockException(1, '2.000');
+    });
+    const svc = makeService(deps);
+
+    await expect(
+      svc.createSale(
+        { lines: [{ productId: 10, qty: 2, unitPrice: 30 }], paidCash: 60, paidCard: 0 } as any,
+        7,
+      ),
+    ).rejects.toMatchObject({
+      response: { code: 'INSUFFICIENT_STOCK', shortages: [{ productId: 1, shortfall: '2.000' }] },
+    });
+  });
+});

@@ -85,4 +85,11 @@ describe('CodesService (SPEC §6.9)', () => {
     const code = await svc.generateUniqueSupplierCode();
     expect(code).toBe('3');
   });
+
+  it('generateUniqueCompositeCode uses its own pool but checks against Product.code', async () => {
+    const prisma = makePrisma({ composite: 1 }, ['1']);
+    const svc = new CodesService(prisma);
+    const code = await svc.generateUniqueCompositeCode();
+    expect(code).toBe('2');
+  });
 });

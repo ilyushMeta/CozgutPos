@@ -8,12 +8,17 @@ function makePrisma({
     id: 1,
     name: 'Çörek',
     batches: [{ qtyRemaining: '10', buyPrice: '3.00', receivedAt: new Date('2026-01-01') }],
+    recipe: null as any,
   },
   pack = null as null | { id: number; qtyInside: string },
   debtor = { id: 1, name: 'Aman' } as any,
-}: { product?: any; pack?: any; debtor?: any } = {}) {
+  ingredients = [] as any[],
+}: { product?: any; pack?: any; debtor?: any; ingredients?: any[] } = {}) {
   return {
-    product: { findUniqueOrThrow: vi.fn(async () => product) },
+    product: {
+      findUniqueOrThrow: vi.fn(async () => product),
+      findMany: vi.fn(async () => ingredients),
+    },
     unitPack: { findUniqueOrThrow: vi.fn(async () => pack) },
     customer: { findUnique: vi.fn(async () => debtor) },
   } as any;
@@ -151,5 +156,62 @@ describe('SalesValidationService — debt (SPEC §6.5)', () => {
     await expect(
       svc.validate({ ...BASE_INPUT, paidCash: 0, paidCard: 0, paidDebt: 10, debtorId: 999 }),
     ).rejects.toBeInstanceOf(NotFoundException);
+  });
+});
+
+describe('SalesValidationService — composite (Önüm) lines (SPEC §6.6)', () => {
+  const COMPOSITE_PRODUCT = {
+    id: 10,
+    name: 'Kompozit haryt',
+    isComposite: true,
+    category: null,
+    recipe: {
+      items: [
+        { ingredientProductId: 1, qty: '2' }, // 2x product 1 per composite unit
+        { ingredientProductId: 2, qty: '1' }, // 1x product 2 per composite unit
+      ],
+    },
+  };
+  const INGREDIENT_1 = {
+    id: 1,
+    batches: [{ qtyRemaining: '20', buyPrice: '3.00', receivedAt: new Date('2026-01-01') }],
+  };
+  const INGREDIENT_2 = {
+    id: 2,
+    batches: [{ qtyRemaining: '3', buyPrice: '10.00', receivedAt: new Date('2026-01-01') }],
+  };
+
+  it('computes availability as the fewest units any ingredient supports', async () => {
+    const svc = new SalesValidationService(
+      makePrisma({ product: COMPOSITE_PRODUCT, ingredients: [INGREDIENT_1, INGREDIENT_2] }),
+    );
+    const resolved = await svc.validate({
+      ...BASE_INPUT,
+      lines: [{ productId: 10, qty: 2, unitPrice: 30 }],
+    });
+    // ingredient 1: 20/2=10 units possible; ingredient 2: 3/1=3 units possible -> min=3
+    expect(resolved[0].totalRemaining.toFixed(3)).toBe('3.000');
+    expect(resolved[0].isComposite).toBe(true);
+  });
+
+  it('computes cost basis as the sum of each ingredient qty × latest buyPrice', async () => {
+    const svc = new SalesValidationService(
+      makePrisma({ product: COMPOSITE_PRODUCT, ingredients: [INGREDIENT_1, INGREDIENT_2] }),
+    );
+    const resolved = await svc.validate({
+      ...BASE_INPUT,
+      lines: [{ productId: 10, qty: 1, unitPrice: 30 }],
+    });
+    // 2*3.00 + 1*10.00 = 16.00
+    expect(resolved[0].costBasis?.toFixed(2)).toBe('16.00');
+  });
+
+  it('rejects insufficient composite availability', async () => {
+    const svc = new SalesValidationService(
+      makePrisma({ product: COMPOSITE_PRODUCT, ingredients: [INGREDIENT_1, INGREDIENT_2] }),
+    );
+    await expect(
+      svc.validate({ ...BASE_INPUT, lines: [{ productId: 10, qty: 5, unitPrice: 30 }] }),
+    ).rejects.toMatchObject({ response: { code: SaleErrorCode.INSUFFICIENT_STOCK } });
   });
 });

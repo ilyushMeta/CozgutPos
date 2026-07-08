@@ -50,4 +50,14 @@ export class CodesService {
       if (!exists) return candidate;
     }
   }
+
+  /** Next composite (Önüm) code — its own sequence (SPEC §4.1), but checked
+   * against Product.code since composites live in the same table. */
+  async generateUniqueCompositeCode(): Promise<string> {
+    for (;;) {
+      const candidate = String(await this.next('composite'));
+      const exists = await this.prisma.product.findUnique({ where: { code: candidate } });
+      if (!exists) return candidate;
+    }
+  }
 }

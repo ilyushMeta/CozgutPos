@@ -169,12 +169,9 @@ export class SalesService {
     const saleLinesData = [];
 
     for (const line of resolved) {
-      const { breakdown, cogs } = await this.fifo.deduct(
-        tx,
-        line.productId,
-        line.baseQty,
-        costingMethod,
-      );
+      const { breakdown, cogs } = line.isComposite
+        ? await this.deductComposite(tx, line, costingMethod)
+        : await this.fifo.deduct(tx, line.productId, line.baseQty, costingMethod);
       cogsTotal = cogsTotal.plus(cogs);
 
       const lineTotal = money(line.qty.times(dec(line.unitPrice)));
@@ -194,6 +191,27 @@ export class SalesService {
     }
 
     return { saleLinesData, cogsTotal: money(cogsTotal), total: sumMoney(lineTotals), receiptNo };
+  }
+
+  /**
+   * SPEC §6.6: a composite (Önüm) line deducts each RecipeItem's ingredient
+   * via FifoService instead of its own batches; COGS = Σ ingredient COGS.
+   * The stored batchBreakdown groups each ingredient's own breakdown so the
+   * exact consumption is auditable (this doubles as the "production log").
+   */
+  private async deductComposite(tx: Tx, line: ResolvedLine, costingMethod: 'fifo' | 'lifo') {
+    let cogs = dec(0);
+    const ingredientBreakdowns = [];
+    for (const item of line.recipeItems!) {
+      const neededQty = item.qty.times(line.baseQty);
+      const result = await this.fifo.deduct(tx, item.ingredientProductId, neededQty, costingMethod);
+      cogs = cogs.plus(result.cogs);
+      ingredientBreakdowns.push({
+        ingredientProductId: item.ingredientProductId,
+        breakdown: result.breakdown,
+      });
+    }
+    return { breakdown: { composite: true, ingredients: ingredientBreakdowns }, cogs: money(cogs) };
   }
 
   /**
