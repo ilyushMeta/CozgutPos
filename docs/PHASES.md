@@ -42,14 +42,14 @@ Rules: one phase per session/branch. Start each phase in plan mode. A phase is D
 - [x] Acceptance: SPEC §13 item 1 fully passes incl. debt + schedule; unit tests for installment splitting
 
 ## Phase 5 — Cash, Returns, Ops
-- [ ] Kassa: day open (opening balance), deposit, withdraw (reason + report record), day/period movement views, live balance tile
-- [ ] Returns (SPEC §6.12): search sold lines, restock exact batch, financial reversal, audit row
-- [ ] Rewiz: count vs system, money impact rows, zero-stock action with audit
-- [ ] Tükelleme: counting session, live shortage/surplus tables, apply adjustments, print/export
-- [ ] Second shop (SPEC §6.11): simplified sale, own receipt sequence, back-office period views
-- [ ] Recipes/Önüm (SPEC §6.6): build recipe from cart, composite sale deducts ingredients, production log
-- [ ] Needed-products list CRUD
-- [ ] Acceptance: SPEC §13 items 2 and 4 pass
+- [x] Kassa: day open (opening balance), deposit, withdraw (reason + report record), day/period movement views, live balance tile
+- [x] Returns (SPEC §6.12): search sold lines, restock exact batch, financial reversal, audit row
+- [x] Rewiz: count vs system, money impact rows, zero-stock action with audit
+- [x] Tükelleme: counting session, live shortage/surplus tables, apply adjustments, print/export
+- [x] Second shop (SPEC §6.11): simplified sale, own receipt sequence, back-office period views
+- [x] Recipes/Önüm (SPEC §6.6): build recipe from cart, composite sale deducts ingredients, production log
+- [x] Needed-products list CRUD
+- [x] Acceptance: SPEC §13 items 2 and 4 pass
 
 ## Phase 6 — Reports & Admin
 - [ ] DailySummary nightly job + on-demand rebuild

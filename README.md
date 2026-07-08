@@ -10,8 +10,8 @@ Tailwind). Full specification: [`docs/SPEC.md`](docs/SPEC.md). Delivery plan:
 
 | Workspace | Purpose |
 |---|---|
-| `apps/server` | NestJS REST API + WebSocket (auth, license, settings, catalog, receiving, stock views, labels, PLU, FIFO/LIFO engine, sales, printing, debtors/suppliers, SMS gateway, realtime) |
-| `apps/client` | React 18 + Vite + Tailwind (login, back-office & POS shells, i18n, catalog/receiving/stock screens, Söwda POS screen, debtor/supplier debt screens, minimal dashboard/settings) |
+| `apps/server` | NestJS REST API + WebSocket (auth, license, settings, catalog, receiving, stock views, labels, PLU, FIFO/LIFO engine, sales, printing, debtors/suppliers, SMS gateway, cash register, returns, revision/stocktake, second shop, recipes/composites, needed products, realtime) |
+| `apps/client` | React 18 + Vite + Tailwind (login, back-office & POS shells, i18n, catalog/receiving/stock screens, Söwda POS screen, debtor/supplier debt screens, cash register, returns, revision/stocktake, second shop, recipes, needed products, minimal dashboard/settings) |
 | `packages/shared` | zod DTOs, enums, money/decimal utils, `tm`/`ru` locales |
 | `packages/printer` | ESC/POS receipt rendering (SPEC §7.1 field set) |
 | `tools/migrate-legacy` | Legacy MySQL → new schema CLI (skeleton — Phase 7) |
