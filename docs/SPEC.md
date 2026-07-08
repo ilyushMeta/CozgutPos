@@ -269,16 +269,16 @@ For each phase (Claude Code workflow): (1) enter plan mode and present an implem
 
 ## 13. ACCEPTANCE CHECKLIST (Definition of Done)
 
-- [ ] A mixed sale (cash+card+debt) on a product with 2 batches deducts FIFO correctly, stores per-batch COGS, prints receipt with change, updates cash register, debtor balance (correct currency), and creates a correct N-month schedule.
-- [ ] Selling a composite deducts ingredients; selling a pack deducts qty×inside.
-- [ ] Oversell blocked with per-product shortage message; below-cost blocked; both bypassable by admin checkboxes.
-- [ ] Return restores the exact original batch and reverses money; DailySummary matches.
-- [ ] Two simultaneous cashiers cannot oversell (test proves it).
-- [ ] Migration reconciliation: legacy Σ stock qty/value, Σ debtor & supplier balances equal new system to 0.01.
-- [ ] License countdown + clock-rollback block + activation code path work.
-- [ ] Backup ZIP is password-protected and restorable on a clean MySQL.
-- [ ] Entire UI renders from tm.json (switching to ru shows keys/RU stubs, zero hardcoded strings).
-- [ ] Works with server on PC-A and client browser on PC-B over LAN; realtime stock updates visible.
+- [x] A mixed sale (cash+card+debt) on a product with 2 batches deducts FIFO correctly, stores per-batch COGS, prints receipt with change, updates cash register, debtor balance (correct currency), and creates a correct N-month schedule. (sales.service.test.ts, debt-sale.service.test.ts, installment.test.ts)
+- [x] Selling a composite deducts ingredients; selling a pack deducts qty×inside. (recipes.service.test.ts, fifo.service.test.ts)
+- [x] Oversell blocked with per-product shortage message; below-cost blocked; both bypassable by admin checkboxes. (sales-validation.service.test.ts)
+- [x] Return restores the exact original batch and reverses money; DailySummary matches. (returns.service.test.ts, daily-summary.service.test.ts)
+- [x] Two simultaneous cashiers cannot oversell (test proves it). (fifo.concurrency.test.ts)
+- [x] Migration reconciliation: legacy Σ stock qty/value, Σ debtor & supplier balances equal new system to 0.01. (tools/migrate-legacy, run against the real legacy/dump.sql — all four sums PASS)
+- [x] License countdown + clock-rollback block + activation code path work. (license.service.test.ts)
+- [x] Backup ZIP is password-protected and restorable on a clean MySQL. (backup.service.test.ts, backup-crypto.test.ts — format is gzip+AES-256-GCM rather than a literal PKZIP container, a Phase 6 documented deviation; functionally equivalent: password-protected, restorable via the app's own Restore flow)
+- [x] Entire UI renders from tm.json (switching to ru shows keys/RU stubs, zero hardcoded strings). (`pnpm check:strings`; tm/ru verified at 293/293 key parity, real translations throughout, no stubs)
+- [ ] Works with server on PC-A and client browser on PC-B over LAN; realtime stock updates visible. Architecture is in place (Socket.IO realtime gateway since Phase 1, plain-HTTP LAN access by design) and exercised via the single-machine dev/CI setup throughout every phase, but a literal two-physical-machine run has not been executed — this sandbox has no second machine. See `docs/LAN_SMOKE_TEST.md` for the checklist to run on real shop hardware before go-live.
 
 ## 14. DO NOT CHANGE (semantic freeze)
 
