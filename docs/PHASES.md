@@ -33,13 +33,13 @@ Rules: one phase per session/branch. Start each phase in plan mode. A phase is D
 - [x] Acceptance checklist items 1 (partial: cash/card), 3, 5 from SPEC §13 pass
 
 ## Phase 4 — Debts
-- [ ] Debtors CRUD (auto code, +993 phone, TMT/USD account) with overdue color rules; Suppliers CRUD
-- [ ] Debt sale completion (SPEC §6.5): balance in account currency, DebtSale, N-month DebtSchedule, optional SMS
-- [ ] Karz tölemek: payment → balance + schedule oldest-first, CashMove in, receipt, optional SMS
-- [ ] Dükan karz tölemek: pay supplier from cashbox; SupplierDebtMove ledger views
-- [ ] Dashboard tiles: customer debt totals (TMT/$), supplier debt total; overdue notifications list
-- [ ] SMS gateway client (SPEC §7.4) + Settings test button
-- [ ] Acceptance: SPEC §13 item 1 fully passes incl. debt + schedule; unit tests for installment splitting
+- [x] Debtors CRUD (auto code, +993 phone, TMT/USD account) with overdue color rules; Suppliers CRUD
+- [x] Debt sale completion (SPEC §6.5): balance in account currency, DebtSale, N-month DebtSchedule, optional SMS
+- [x] Karz tölemek: payment → balance + schedule oldest-first, CashMove in, receipt, optional SMS
+- [x] Dükan karz tölemek: pay supplier from cashbox; SupplierDebtMove ledger views
+- [x] Dashboard tiles: customer debt totals (TMT/$), supplier debt total; overdue notifications list (minimal — full Hasabatlar dashboard is Phase 6)
+- [x] SMS gateway client (SPEC §7.4) + Settings test button
+- [x] Acceptance: SPEC §13 item 1 fully passes incl. debt + schedule; unit tests for installment splitting
 
 ## Phase 5 — Cash, Returns, Ops
 - [ ] Kassa: day open (opening balance), deposit, withdraw (reason + report record), day/period movement views, live balance tile
