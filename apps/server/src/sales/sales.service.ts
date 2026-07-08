@@ -18,14 +18,13 @@ import { SettingsService } from '../settings/settings.service.js';
 import { FifoService } from '../fifo/fifo.service.js';
 import { FifoInsufficientStockException } from '../fifo/fifo.exceptions.js';
 import { PrintingService } from '../printing/printing.service.js';
+import { DebtSaleService } from '../debtors/debt-sale.service.js';
+import { SmsService } from '../sms/sms.service.js';
 import { SalesValidationService, type ResolvedLine } from './sales-validation.service.js';
 
 type Tx = Prisma.TransactionClient;
 
-/**
- * Atomic sale transaction (SPEC §6.3–§6.4). Debt is out of scope this phase —
- * see docs/PHASES.md Phase 4 and the doc comment on createSaleSchema.
- */
+/** Atomic sale transaction (SPEC §6.3–§6.4/§6.5). */
 @Injectable()
 export class SalesService {
   constructor(
@@ -36,6 +35,8 @@ export class SalesService {
     private readonly codes: CodesService,
     private readonly settings: SettingsService,
     private readonly printing: PrintingService,
+    private readonly debtSale: DebtSaleService,
+    private readonly sms: SmsService,
   ) {}
 
   async createSale(input: CreateSaleInput, cashierId: number) {
@@ -43,6 +44,7 @@ export class SalesService {
     const costingMethod =
       (await this.settings.get(SettingKey.COSTING_METHOD)) === 'lifo' ? 'lifo' : 'fifo';
     const receiptNo = await this.codes.next('receipt');
+    const saleDate = new Date();
 
     let result;
     try {
@@ -59,6 +61,7 @@ export class SalesService {
           total,
           input.paidCash,
           input.paidCard,
+          input.paidDebt,
         );
 
         const exchangeRate = await tx.exchangeRate.findFirst({
@@ -69,10 +72,12 @@ export class SalesService {
           data: {
             receiptNo,
             cashierId,
+            datetime: saleDate,
             total: moneyStr(total),
             paidCash: moneyStr(input.paidCash),
             paidCard: moneyStr(input.paidCard),
-            paidDebt: '0.00',
+            paidDebt: moneyStr(input.paidDebt),
+            debtorId: input.debtorId ?? null,
             changeGiven: moneyStr(changeGiven),
             discount: moneyStr(discount),
             exchangeRate: exchangeRate ? moneyStr(exchangeRate.rate) : '0.00',
@@ -90,6 +95,20 @@ export class SalesService {
           await this.cash.recordMove(CashMoveType.SALE_CASH, cashKept, `Söwda #${receiptNo}`, tx);
         }
 
+        let debtResult: { newBalance: ReturnType<typeof money>; monthsN: number } | null = null;
+        if (dec(input.paidDebt).greaterThan(0)) {
+          debtResult = await this.debtSale.apply(tx, {
+            debtorId: input.debtorId!,
+            saleId: sale.id,
+            invoiceNo: receiptNo,
+            saleDate,
+            amountTmt: input.paidDebt,
+            dueDate: input.dueDate ?? null,
+            noDueDate: input.noDueDate,
+            exchangeRate: exchangeRate ? exchangeRate.rate : 0,
+          });
+        }
+
         return {
           id: sale.id,
           receiptNo,
@@ -99,6 +118,7 @@ export class SalesService {
           discount: moneyStr(discount),
           cogsTotal: moneyStr(cogsTotal),
           lines: saleLinesData,
+          debtorNewBalance: debtResult ? moneyStr(debtResult.newBalance) : null,
         };
       });
     } catch (e) {
@@ -111,10 +131,31 @@ export class SalesService {
       throw e;
     }
 
-    // After commit only (SPEC §6.4) — a print failure must never affect the
-    // already-committed sale; the client shows a toast from `printed:false`.
+    // After commit only (SPEC §6.4) — a print/SMS failure must never affect
+    // the already-committed sale; the client shows a toast from `printed:false`.
     const printResult = await this.printing.printReceipt(result.id, input.printCopies);
+    if (dec(input.paidDebt).greaterThan(0) && input.sendSms) {
+      await this.sendDebtSaleSms(input, result);
+    }
     return { ...result, ...printResult };
+  }
+
+  /** SPEC §6.5 SMS template, sent fire-and-forget after commit. */
+  private async sendDebtSaleSms(
+    input: CreateSaleInput,
+    result: { total: string; debtorNewBalance: string | null },
+  ): Promise<void> {
+    const debtor = await this.prisma.customer.findUnique({ where: { id: input.debtorId! } });
+    if (!debtor) return;
+    const currencySuffix = debtor.accountCurrency === 'USD' ? '$' : 'TMT';
+    const message =
+      `Salam ${debtor.name}\n` +
+      `Sowda=${result.total}\n` +
+      `Nagt=${moneyStr(input.paidCash)}\n` +
+      `Kart=${moneyStr(input.paidCard)}\n` +
+      `Karz=${moneyStr(input.paidDebt)}\n` +
+      `Umumy hasap=${result.debtorNewBalance}${currencySuffix}`;
+    await this.sms.sendSafely(debtor.phone, message);
   }
 
   private async deductAndBuildLines(
@@ -166,10 +207,12 @@ export class SalesService {
     total: ReturnType<typeof money>,
     paidCash: Numeric,
     paidCard: Numeric,
+    paidDebt: Numeric,
   ) {
     const cash = dec(paidCash);
     const card = dec(paidCard);
-    const paidTotal = cash.plus(card);
+    const debt = dec(paidDebt);
+    const paidTotal = cash.plus(card).plus(debt);
 
     const discounts = await tx.paymentDiscount.findMany();
     const pct = (method: PaymentMethod) =>
@@ -179,10 +222,11 @@ export class SalesService {
       : pct(PaymentMethod.CASH)
           .times(cash)
           .plus(pct(PaymentMethod.CARD).times(card))
+          .plus(pct(PaymentMethod.DEBT).times(debt))
           .dividedBy(paidTotal);
 
     const effectiveTotal = money(total.times(dec(1).minus(blendedPct.dividedBy(100))));
-    const due = effectiveTotal.minus(card);
+    const due = effectiveTotal.minus(card).minus(debt);
     const change = cash.minus(due);
 
     return change.isNegative()

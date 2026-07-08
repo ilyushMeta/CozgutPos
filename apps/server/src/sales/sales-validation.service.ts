@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import {
   dec,
   qty,
@@ -36,8 +36,19 @@ export class SalesValidationService {
     if (input.lines.length === 0) {
       throw new BadRequestException({ code: SaleErrorCode.EMPTY_CART });
     }
-    if (dec(input.paidCash).lessThanOrEqualTo(0) && dec(input.paidCard).lessThanOrEqualTo(0)) {
+    if (
+      dec(input.paidCash).lessThanOrEqualTo(0) &&
+      dec(input.paidCard).lessThanOrEqualTo(0) &&
+      dec(input.paidDebt).lessThanOrEqualTo(0)
+    ) {
       throw new BadRequestException({ code: SaleErrorCode.NO_PAYMENT });
+    }
+    if (dec(input.paidDebt).greaterThan(0)) {
+      if (!input.debtorId) {
+        throw new BadRequestException({ code: SaleErrorCode.DEBTOR_REQUIRED });
+      }
+      const debtor = await this.prisma.customer.findUnique({ where: { id: input.debtorId } });
+      if (!debtor) throw new NotFoundException('debtor not found');
     }
 
     const resolved = await this.resolveLines(input.lines);

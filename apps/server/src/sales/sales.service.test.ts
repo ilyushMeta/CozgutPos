@@ -24,6 +24,8 @@ function makeDeps({
   exchangeRate = null as null | { rate: string },
   fifoResult = { breakdown: [{ batchId: 1, qty: '2.000', buyPrice: '2.00' }], cogs: dec('4.00') },
   costingMethod = 'fifo',
+  debtApplyResult = { newBalance: dec('0.00'), monthsN: 1 },
+  debtor = { id: 1, name: 'Aman', phone: '+99361234567', accountCurrency: 'TMT' },
 }: any = {}) {
   const created: any = { sale: null, lines: [] as any[], cashMoves: [] as any[] };
 
@@ -44,7 +46,10 @@ function makeDeps({
     },
   };
 
-  const prisma = { $transaction: vi.fn(async (fn: any) => fn(tx)) };
+  const prisma = {
+    $transaction: vi.fn(async (fn: any) => fn(tx)),
+    customer: { findUnique: vi.fn(async () => debtor) },
+  };
   const validation = { validate: vi.fn(async () => resolvedLines) };
   const fifo = { deduct: vi.fn(async () => fifoResult) };
   const cash = {
@@ -57,8 +62,10 @@ function makeDeps({
   const printing = {
     printReceipt: vi.fn(async () => ({ printed: false, reason: 'printer not configured' })),
   };
+  const debtSale = { apply: vi.fn(async () => debtApplyResult) };
+  const sms = { sendSafely: vi.fn(async () => undefined) };
 
-  return { prisma, validation, fifo, cash, codes, settings, printing, created, tx };
+  return { prisma, validation, fifo, cash, codes, settings, printing, debtSale, sms, created, tx };
 }
 
 function makeService(deps: ReturnType<typeof makeDeps>) {
@@ -70,6 +77,8 @@ function makeService(deps: ReturnType<typeof makeDeps>) {
     deps.codes as any,
     deps.settings as any,
     deps.printing as any,
+    deps.debtSale as any,
+    deps.sms as any,
   );
 }
 
@@ -222,5 +231,98 @@ describe('SalesService.createSale (SPEC §6.3/§6.4/§6.10)', () => {
     ).rejects.toMatchObject({
       response: { code: 'INSUFFICIENT_STOCK', shortages: [{ productId: 1, shortfall: '1.000' }] },
     });
+  });
+});
+
+describe('SalesService.createSale — debt (SPEC §6.5)', () => {
+  it('treats debt like a payment method: reduces due, applies the debt sale, stores paidDebt/debtorId', async () => {
+    const deps = makeDeps({ debtApplyResult: { newBalance: dec('10.00'), monthsN: 3 } });
+    const svc = makeService(deps);
+    const result = await svc.createSale(
+      {
+        lines: [{ productId: 1, qty: 2, unitPrice: 5 }],
+        paidCash: 0,
+        paidCard: 0,
+        paidDebt: 10,
+        debtorId: 1,
+      } as any,
+      7,
+    );
+
+    expect(deps.created.sale.paidDebt).toBe('10.00');
+    expect(deps.created.sale.debtorId).toBe(1);
+    expect(result.changeGiven).toBe('0.00');
+    expect(result.discount).toBe('0.00');
+    expect(result.debtorNewBalance).toBe('10.00');
+    expect(deps.debtSale.apply).toHaveBeenCalledWith(
+      deps.tx,
+      expect.objectContaining({ debtorId: 1, saleId: 1, amountTmt: 10 }),
+    );
+  });
+
+  it('blends the DEBT PaymentDiscount into the effective total', async () => {
+    // total=10, all debt, debt discount 10% -> effectiveTotal=9.00, due=9-9=0, change=0
+    const deps = makeDeps({ paymentDiscounts: [{ method: 'DEBT', percent: '10' }] });
+    const svc = makeService(deps);
+    const result = await svc.createSale(
+      {
+        lines: [{ productId: 1, qty: 2, unitPrice: 5 }],
+        paidCash: 0,
+        paidCard: 0,
+        paidDebt: 9,
+        debtorId: 1,
+      } as any,
+      7,
+    );
+
+    expect(result.effectiveTotal).toBe('9.00');
+    expect(result.changeGiven).toBe('0.00');
+  });
+
+  it('does not call DebtSaleService for a cash/card-only sale', async () => {
+    const deps = makeDeps();
+    const svc = makeService(deps);
+    await svc.createSale(
+      { lines: [{ productId: 1, qty: 2, unitPrice: 5 }], paidCash: 10, paidCard: 0 } as any,
+      7,
+    );
+    expect(deps.debtSale.apply).not.toHaveBeenCalled();
+  });
+
+  it('sends the SPEC §6.5 SMS template only when sendSms is true', async () => {
+    const deps = makeDeps({ debtApplyResult: { newBalance: dec('10.00'), monthsN: 1 } });
+    const svc = makeService(deps);
+    await svc.createSale(
+      {
+        lines: [{ productId: 1, qty: 2, unitPrice: 5 }],
+        paidCash: 0,
+        paidCard: 0,
+        paidDebt: 10,
+        debtorId: 1,
+        sendSms: true,
+      } as any,
+      7,
+    );
+
+    expect(deps.sms.sendSafely).toHaveBeenCalledWith(
+      '+99361234567',
+      expect.stringContaining('Karz=10.00'),
+    );
+  });
+
+  it('does not send SMS when sendSms is false, even for a debt sale', async () => {
+    const deps = makeDeps();
+    const svc = makeService(deps);
+    await svc.createSale(
+      {
+        lines: [{ productId: 1, qty: 2, unitPrice: 5 }],
+        paidCash: 0,
+        paidCard: 0,
+        paidDebt: 10,
+        debtorId: 1,
+      } as any,
+      7,
+    );
+    expect(deps.sms.sendSafely).not.toHaveBeenCalled();
   });
 });
