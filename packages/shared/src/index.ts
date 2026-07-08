@@ -6,6 +6,8 @@ export * from './translit.js';
 export * from './catalog.js';
 export * from './receiving.js';
 export * from './sales.js';
+export * from './debts.js';
+export * from './sms.js';
 
 // Locale dictionaries are consumed only by the client (i18next). They are
 // exposed via the `@cozgut/shared/locales/*` subpath exports (raw JSON) so the
