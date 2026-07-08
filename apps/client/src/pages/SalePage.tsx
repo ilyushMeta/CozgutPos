@@ -86,6 +86,7 @@ export function SalePage() {
   const [allowBelowCost, setAllowBelowCost] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [lastReceipt, setLastReceipt] = useState<{
+    id: number;
     receiptNo: number;
     total: string;
     printed: boolean;
@@ -178,7 +179,12 @@ export function SalePage() {
         allowBelowCost,
       } as any),
     onSuccess: (result) => {
-      setLastReceipt({ receiptNo: result.receiptNo, total: result.total, printed: result.printed });
+      setLastReceipt({
+        id: result.id,
+        receiptNo: result.receiptNo,
+        total: result.total,
+        printed: result.printed,
+      });
       setCart([]);
       setPaidCash('');
       setPaidCard('');
@@ -370,7 +376,7 @@ export function SalePage() {
               {!lastReceipt.printed && ` — ${t('sale.printFailed')}`}
             </span>
             <button
-              onClick={() => void openFakturPdf(lastReceipt.receiptNo)}
+              onClick={() => void openFakturPdf(lastReceipt.id)}
               className="underline text-xs"
             >
               {t('sale.printFaktur')}

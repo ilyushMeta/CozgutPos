@@ -26,6 +26,15 @@ import { StocktakePage } from './StocktakePage';
 import { SecondShopPage } from './SecondShopPage';
 import { RecipesPage } from './RecipesPage';
 import { NeededProductsPage } from './NeededProductsPage';
+import { SoldItemsReportPage } from './SoldItemsReportPage';
+import { ReceiptsReportPage } from './ReceiptsReportPage';
+import { DebtMovementsReportPage } from './DebtMovementsReportPage';
+import { LoginAuditPage } from './LoginAuditPage';
+import { UsersPage } from './UsersPage';
+import { DiscountsPage } from './DiscountsPage';
+import { CurrencyPage } from './CurrencyPage';
+import { BackupPage } from './BackupPage';
+import { LicensePage } from './LicensePage';
 
 // Sidebar navigation (SPEC §9). Screens not yet built fall back to ComingSoon.
 const NAV_ITEMS = [
@@ -47,8 +56,15 @@ const NAV_ITEMS = [
   { key: 'nav.recipes', path: '/recipes' },
   { key: 'nav.neededProducts', path: '/needed-products' },
   { key: 'nav.currency', path: '/currency' },
+  { key: 'nav.discount', path: '/discounts' },
   { key: 'nav.reports', path: '/reports' },
+  { key: 'reports.soldItems', path: '/reports/sold-items' },
+  { key: 'reports.receipts', path: '/reports/receipts' },
+  { key: 'reports.debtMovements', path: '/reports/debt-movements' },
+  { key: 'reports.loginAudit', path: '/reports/login-audit' },
   { key: 'nav.users', path: '/users' },
+  { key: 'nav.backup', path: '/backup' },
+  { key: 'nav.license', path: '/license' },
   { key: 'nav.settings', path: '/settings' },
 ] as const;
 
@@ -118,6 +134,15 @@ export function BackOfficeShell() {
             <Route path="/second-shop" element={<SecondShopPage />} />
             <Route path="/recipes" element={<RecipesPage />} />
             <Route path="/needed-products" element={<NeededProductsPage />} />
+            <Route path="/reports/sold-items" element={<SoldItemsReportPage />} />
+            <Route path="/reports/receipts" element={<ReceiptsReportPage />} />
+            <Route path="/reports/debt-movements" element={<DebtMovementsReportPage />} />
+            <Route path="/reports/login-audit" element={<LoginAuditPage />} />
+            <Route path="/users" element={<UsersPage />} />
+            <Route path="/discounts" element={<DiscountsPage />} />
+            <Route path="/currency" element={<CurrencyPage />} />
+            <Route path="/backup" element={<BackupPage />} />
+            <Route path="/license" element={<LicensePage />} />
             {NAV_ITEMS.filter(
               (i) =>
                 ![
@@ -140,6 +165,15 @@ export function BackOfficeShell() {
                   '/second-shop',
                   '/recipes',
                   '/needed-products',
+                  '/reports/sold-items',
+                  '/reports/receipts',
+                  '/reports/debt-movements',
+                  '/reports/login-audit',
+                  '/users',
+                  '/discounts',
+                  '/currency',
+                  '/backup',
+                  '/license',
                 ].includes(i.path),
             ).map((item) => (
               <Route

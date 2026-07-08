@@ -34,7 +34,14 @@
     "unlimited": "Çäksiz",
     "expired": "Siziň programmany ulanma rugsadyňyz gutardy",
     "clockRolledBack": "Wagt yza çekilen",
-    "title": "Rugsat"
+    "title": "Rugsat",
+    "activate": "Aktiwleşdirmek",
+    "activationCode": "Aktiwasiýa kody",
+    "activateSuccess": "Üstünlikli aktiwleşdirildi",
+    "hardwareMismatch": "Enjam üýtgedi — administrator tassyklamaly",
+    "rebind": "Bu enjamy kabul et",
+    "rebindSuccess": "Enjam täzelendi",
+    "plan": "Meýilnama"
   },
   "nav": {
     "sale": "Söwda",
@@ -56,7 +63,9 @@
     "neededProducts": "Gerekli harytlar",
     "returns": "Yzyna goýmak",
     "recipes": "Önüm",
-    "users": "Ulanyjylar"
+    "users": "Ulanyjylar",
+    "backup": "Ätiýaçlyk nusga",
+    "license": "Rugsat"
   },
   "product": {
     "name": "Ady",
@@ -269,7 +278,53 @@
     "profitability": "Düşewintlilik",
     "customerDebtTotal": "Müşderi karzy",
     "supplierDebtTotal": "Dükan karzy",
-    "overdueDebtors": "Möhleti geçen karzçylar"
+    "overdueDebtors": "Möhleti geçen karzçylar",
+    "debtMovements": "Karz hereketleri",
+    "rebuild": "Gaýtadan hasapla",
+    "rebuildSuccess": "Üstünlikli gaýtadan hasaplandy",
+    "profitChart": "12 aýlyk peýda",
+    "categoryChart": "Kategoriýa boýunça",
+    "search": "Gözleg",
+    "paymentMethod": "Töleg görnüşi",
+    "filter": "Süzgüç",
+    "customerPayments": "Karzçy tölegleri",
+    "supplierMoves": "Dükan hereketleri"
+  },
+  "users": {
+    "title": "Ulanyjylar",
+    "addNew": "Täze ulanyjy",
+    "active": "Işjeň",
+    "inactive": "Işjeň däl",
+    "deactivate": "Öçür",
+    "activateUser": "Işjeňleşdir",
+    "newPassword": "Täze parol"
+  },
+  "discount": {
+    "title": "Skidka",
+    "percent": "Göterim (%)"
+  },
+  "currency": {
+    "title": "Walýuta",
+    "currentRate": "Häzirki kurs",
+    "newRate": "Täze kurs",
+    "add": "Goş",
+    "history": "Taryh"
+  },
+  "backup": {
+    "title": "Ätiýaçlyk nusga",
+    "create": "Nusga döret",
+    "createSuccess": "Nusga döredildi",
+    "list": "Nusgalar",
+    "restore": "Dikelt",
+    "restoreSuccess": "Dikeldildi",
+    "folder": "Papka",
+    "password": "Parol",
+    "retentionDays": "Saklama möhleti (gün)",
+    "scheduleEnabled": "Gündelik tertip işjeň",
+    "filename": "Faýl ady",
+    "size": "Ölçegi",
+    "uploadFile": "Faýl saýla",
+    "confirmRestore": "Dikeltmegi tassyklaýarsyňmy? Häzirki maglumatlar üstüne ýazylar."
   },
   "common": {
     "date": "Sene",

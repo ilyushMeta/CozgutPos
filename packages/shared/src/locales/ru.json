@@ -34,7 +34,14 @@
     "unlimited": "Безлимитный",
     "expired": "Срок действия лицензии истёк",
     "clockRolledBack": "Время переведено назад",
-    "title": "Лицензия"
+    "title": "Лицензия",
+    "activate": "Активировать",
+    "activationCode": "Код активации",
+    "activateSuccess": "Успешно активировано",
+    "hardwareMismatch": "Оборудование изменилось — требуется подтверждение администратора",
+    "rebind": "Принять это оборудование",
+    "rebindSuccess": "Оборудование обновлено",
+    "plan": "Тариф"
   },
   "nav": {
     "sale": "Продажа",
@@ -56,7 +63,9 @@
     "neededProducts": "Нужные товары",
     "returns": "Возврат",
     "recipes": "Продукция",
-    "users": "Пользователи"
+    "users": "Пользователи",
+    "backup": "Резервная копия",
+    "license": "Лицензия"
   },
   "product": {
     "name": "Название",
@@ -269,7 +278,53 @@
     "profitability": "Рентабельность",
     "customerDebtTotal": "Долги клиентов",
     "supplierDebtTotal": "Долги поставщикам",
-    "overdueDebtors": "Просроченные должники"
+    "overdueDebtors": "Просроченные должники",
+    "debtMovements": "Движения долгов",
+    "rebuild": "Пересчитать",
+    "rebuildSuccess": "Успешно пересчитано",
+    "profitChart": "Прибыль за 12 месяцев",
+    "categoryChart": "По категориям",
+    "search": "Поиск",
+    "paymentMethod": "Способ оплаты",
+    "filter": "Фильтр",
+    "customerPayments": "Платежи должников",
+    "supplierMoves": "Движения поставщика"
+  },
+  "users": {
+    "title": "Пользователи",
+    "addNew": "Новый пользователь",
+    "active": "Активен",
+    "inactive": "Неактивен",
+    "deactivate": "Деактивировать",
+    "activateUser": "Активировать",
+    "newPassword": "Новый пароль"
+  },
+  "discount": {
+    "title": "Скидка",
+    "percent": "Процент (%)"
+  },
+  "currency": {
+    "title": "Валюта",
+    "currentRate": "Текущий курс",
+    "newRate": "Новый курс",
+    "add": "Добавить",
+    "history": "История"
+  },
+  "backup": {
+    "title": "Резервная копия",
+    "create": "Создать копию",
+    "createSuccess": "Копия создана",
+    "list": "Копии",
+    "restore": "Восстановить",
+    "restoreSuccess": "Восстановлено",
+    "folder": "Папка",
+    "password": "Пароль",
+    "retentionDays": "Срок хранения (дней)",
+    "scheduleEnabled": "Ежедневное расписание включено",
+    "filename": "Имя файла",
+    "size": "Размер",
+    "uploadFile": "Выбрать файл",
+    "confirmRestore": "Подтвердить восстановление? Текущие данные будут перезаписаны."
   },
   "common": {
     "date": "Дата",

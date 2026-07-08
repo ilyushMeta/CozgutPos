@@ -3,7 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ColumnDef } from '@tanstack/react-table';
-import { depositCash, fetchCashMoves, fetchCashToday, openCashDay, withdrawCash } from '../api';
+import {
+  depositCash,
+  downloadCsv,
+  fetchCashMoves,
+  fetchCashToday,
+  openCashDay,
+  withdrawCash,
+} from '../api';
 import { DataTable } from '../components/DataTable';
 
 const inputCls =
@@ -24,9 +31,11 @@ export function CashPage() {
   const qc = useQueryClient();
 
   const { data: today } = useQuery({ queryKey: ['cash-today'], queryFn: fetchCashToday });
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
   const { data: moves = [] } = useQuery({
-    queryKey: ['cash-moves'],
-    queryFn: () => fetchCashMoves(),
+    queryKey: ['cash-moves', from, to],
+    queryFn: () => fetchCashMoves(from || undefined, to || undefined),
   });
 
   const invalidate = () => {
@@ -179,7 +188,34 @@ export function CashPage() {
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-        <h2 className="font-medium mb-3">{t('cash.moves')}</h2>
+        <div className="flex items-center justify-between mb-3 gap-2">
+          <h2 className="font-medium">{t('cash.moves')}</h2>
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
+              className={`${inputCls} w-auto`}
+            />
+            <input
+              type="date"
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
+              className={`${inputCls} w-auto`}
+            />
+            <button
+              onClick={() =>
+                void downloadCsv('/cash/moves', 'kassa-hereketleri.csv', {
+                  from: from || undefined,
+                  to: to || undefined,
+                })
+              }
+              className="px-3 py-1.5 rounded bg-gray-200 dark:bg-gray-700 text-sm"
+            >
+              {t('app.export')}
+            </button>
+          </div>
+        </div>
         <DataTable data={moves} columns={columns} />
       </div>
     </div>
