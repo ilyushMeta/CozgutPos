@@ -52,12 +52,12 @@ Rules: one phase per session/branch. Start each phase in plan mode. A phase is D
 - [x] Acceptance: SPEC §13 items 2 and 4 pass
 
 ## Phase 6 — Reports & Admin
-- [ ] DailySummary nightly job + on-demand rebuild
-- [ ] Dashboard: today/period profit, 12-month profit chart, category breakdown
-- [ ] Report tables + CSV: sold items (all filters), receipts w/ faktur reprint, cash moves, debt movements, login audit
-- [ ] Users CRUD; Discounts screen; Currency screen w/ rate history; Backup/Restore (mysqldump → AES password ZIP, retention, schedule; restore incl. create-DB)
-- [ ] License screen: activation codes add days, clock-rollback block, hardware fingerprint soft-check
-- [ ] Acceptance: SPEC §13 items 7, 8 pass; charts match DailySummary numbers
+- [x] DailySummary nightly job + on-demand rebuild
+- [x] Dashboard: today/period profit, 12-month profit chart, category breakdown
+- [x] Report tables + CSV: sold items (all filters), receipts w/ faktur reprint, cash moves, debt movements, login audit
+- [x] Users CRUD; Discounts screen; Currency screen w/ rate history; Backup/Restore (mysqldump → AES password ZIP, retention, schedule; restore incl. create-DB)
+- [x] License screen: activation codes add days, clock-rollback block, hardware fingerprint soft-check
+- [x] Acceptance: SPEC §13 items 7, 8 pass; charts match DailySummary numbers
 
 ## Phase 7 — Migration & Hardening
 - [ ] tools/migrate-legacy CLI per SPEC §10 (normalize varchar numerics, map all tables, preserve legacy ids)
