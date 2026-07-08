@@ -35,6 +35,7 @@ export const licenseStatusSchema = z.object({
   unlimited: z.boolean(),
   blocked: z.boolean(),
   blockReason: z.string().nullable(),
+  hardwareMismatch: z.boolean(),
 });
 export type LicenseStatus = z.infer<typeof licenseStatusSchema>;
 

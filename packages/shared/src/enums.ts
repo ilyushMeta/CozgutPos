@@ -73,5 +73,9 @@ export const SettingKey = {
   SMS_TOKEN: 'sms.token',
   LANGUAGE: 'ui.language', // 'tm' | 'ru'
   FIRST_RUN_DONE: 'app.firstRunDone',
+  BACKUP_FOLDER: 'backup.folder',
+  BACKUP_RETENTION_DAYS: 'backup.retentionDays',
+  BACKUP_PASSWORD: 'backup.password',
+  BACKUP_SCHEDULE_ENABLED: 'backup.scheduleEnabled',
 } as const;
 export type SettingKey = (typeof SettingKey)[keyof typeof SettingKey];
