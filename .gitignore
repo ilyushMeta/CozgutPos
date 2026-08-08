@@ -7,3 +7,7 @@ dist-ssr
 .env.*
 !.env.example
 *.tsbuildinfo
+
+# Baza dump-lary - icinde hakyky sowda maglumatlary bolup biler
+tools/*.sql
+
